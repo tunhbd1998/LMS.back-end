@@ -1,23 +1,29 @@
 "use strict";
 
-var passport = require("passport");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.configPassport = void 0;
 
-var _require = require("./strategies"),
-    useLocalStrategy = _require.useLocalStrategy,
-    useJwtStrategy = _require.useJwtStrategy,
-    useFacebookStrategy = _require.useFacebookStrategy,
-    useGoogleStrategy = _require.useGoogleStrategy;
+var _passport = _interopRequireDefault(require("passport"));
+
+var _strategies = require("./strategies");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 var configPassport = function configPassport(app) {
-  app.use(passport.initialize());
-  passport.serializeUser(function (user, done) {
+  app.use(_passport["default"].initialize());
+
+  _passport["default"].serializeUser(function (user, done) {
     done(null, user);
   });
-  passport.deserializeUser(function (obj, done) {
+
+  _passport["default"].deserializeUser(function (obj, done) {
     done(null, obj);
   });
-  useLocalStrategy();
-  useJwtStrategy();
-  useFacebookStrategy();
-  useGoogleStrategy();
+
+  (0, _strategies.useLocalStrategy)();
+  (0, _strategies.useJwtStrategy)();
 };
+
+exports.configPassport = configPassport;

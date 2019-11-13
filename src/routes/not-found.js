@@ -1,1 +1,7 @@
-export const handleNotFound = (req, res, next) => {};
+export const handleNotFound = (req, res, next) => {
+  if (!req.error) {
+    return res.status(404).send();
+  }
+
+  next();
+};

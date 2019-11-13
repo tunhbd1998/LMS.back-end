@@ -3,18 +3,16 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { omit, get } from 'lodash';
 import { PASSPORT } from '../config';
+import { userService } from '../services';
+import { hashPassword, comparePassword } from '../utils/password';
 
 const { JWT } = PASSPORT;
-// const { userModel } = require("../database");
-// const { CustomError } = require('../defines/errors');
-// const { NEED_TO_REMOVE_FIELDS_TOKEN } = require('../defines/constants');
-// const { hashPassword } = require('../utils/password');
 
 // JWT Strategy
 export const useJwtStrategy = () => {
   const opts = {
     secretOrKey: JWT.SECRET,
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
   };
 
   passport.use(
@@ -23,10 +21,10 @@ export const useJwtStrategy = () => {
         return cb(null, null);
       }
 
-      // userModel
-      //   .findOne({ username: jwt_payload.username })
-      //   .then(user => cb(null, user))
-      //   .catch(err => cb(err, null));
+      userService
+        .findOne({ username: jwtPayload.username })
+        .then(user => cb(null, user))
+        .catch(err => cb(err, null));
     })
   );
 };
@@ -34,14 +32,28 @@ export const useJwtStrategy = () => {
 // Local Strategy
 export const useLocalStrategy = () => {
   passport.use(
-    new LocalStrategy(function(username, password, cb) {
-      userModel
-        .findOne({ username, password: hashPassword(password) })
-        .then(user => {
-          if (!user) {
-            return cb(null, null);
+    new LocalStrategy(async (username, password, cb) => {
+      console.log('password', password);
+      userService
+        .findOne({ username })
+        .then(async user => {
+          if (user && (await comparePassword(password, user.password))) {
+            return cb(
+              null,
+              omit(user, [
+                'password',
+                'phone',
+                'email',
+                'university',
+                'IDCardNumber',
+                'IDNumber',
+                'labId',
+                'isTeacher'
+              ])
+            );
           }
-          cb(null, omit(user, NEED_TO_REMOVE_FIELDS_TOKEN));
+
+          return cb(null, null);
         })
         .catch(err => cb(err, null));
     })

@@ -1,79 +1,60 @@
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
 var _path = _interopRequireDefault(require("path"));
+
+var _express = _interopRequireDefault(require("express"));
+
+var _bodyParser = _interopRequireDefault(require("body-parser"));
+
+var _cookieParser = _interopRequireDefault(require("cookie-parser"));
+
+var _morgan = _interopRequireDefault(require("morgan"));
+
+var _dotenv = _interopRequireDefault(require("dotenv"));
+
+var _routes = require("./routes");
+
+var _services = require("./services");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-// const createError = require('http-errors');
-// const path = require("path");
-var express = require("express");
+_dotenv["default"].config({
+  path: _path["default"].join(__dirname, '/.env')
+}); // import { configPassport } from './passport';
 
-var bodyParser = require("body-parser");
 
-var cookieParser = require("cookie-parser");
+var app = (0, _express["default"])(); // config app
 
-var logger = require("morgan");
-
-var indexRouter = require("./routes/index");
-
-var usersRouter = require("./routes/users");
-
-var app = express(); // config app
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
+app.use(_bodyParser["default"].json());
+app.use(_bodyParser["default"].urlencoded({
   extended: true
 }));
-app.use(logger("dev"));
-app.use(express.json());
-app.use(express.urlencoded({
+app.use((0, _morgan["default"])('dev'));
+app.use(_express["default"].json());
+app.use(_express["default"].urlencoded({
   extended: false
 }));
-app.use(cookieParser());
-app.use(express["static"](_path["default"].join(__dirname, "public")));
+app.use((0, _cookieParser["default"])());
+app.use(_express["default"]["static"](_path["default"].join(__dirname, 'public'))); // view engine setup
 
-var passport = require("passport"),
-    LocalStrategy = require("passport-local").Strategy;
+app.set('views', _path["default"].join(__dirname, 'views'));
+app.set('view engine', 'ejs'); // config passport
+// configPassport(app);
 
-passport.use(new LocalStrategy(function (username, password, done) {
-  User.findOne({
-    username: username
-  }, function (err, user) {
-    if (err) {
-      return done(err);
-    }
+app.use('/users', _routes.userRouter);
+app.use(_routes.handleNotFound);
+app.use(_routes.handleError);
 
-    if (!user) {
-      return done(null, false, {
-        message: "Incorrect username."
-      });
-    }
-
-    if (!user.validPassword(password)) {
-      return done(null, false, {
-        message: "Incorrect password."
-      });
-    }
-
-    return done(null, user);
-  });
-})); // view engine setup
-
-app.set("views", _path["default"].join(__dirname, "views"));
-app.set("view engine", "ejs");
-app.use("/", indexRouter);
-app.use("/users", usersRouter); // catch 404 and forward to error handler
-
-app.use(function (req, res, next) {
-  next(createError(404));
-}); // error handler
-
-app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {}; // render the error page
-
-  res.status(err.status || 500);
-  res.render("error");
+_services.userService.findMany({}).then(function (users) {
+  return console.log('users', users);
+})["catch"](function (err) {
+  return console.log('error', err);
 });
-module.exports = app;
+
+var _default = app;
+exports["default"] = _default;
