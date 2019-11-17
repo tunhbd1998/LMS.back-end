@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import dotenv from 'dotenv';
 import debugModule from 'debug';
+import cors from 'cors';
 import { handleNotFound, handleError, userRouter } from './routes';
 import { userService } from './services';
 import { configPassport } from './passport';
@@ -13,7 +14,9 @@ const log = debugModule('LMS:app');
 dotenv.config({ path: path.join(__dirname, '/.env') });
 
 const app = express();
+
 // config app
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(logger('dev'));
