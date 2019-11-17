@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = void 0;
+exports.default = void 0;
 
 var _path = _interopRequireDefault(require("path"));
 
@@ -17,44 +17,62 @@ var _morgan = _interopRequireDefault(require("morgan"));
 
 var _dotenv = _interopRequireDefault(require("dotenv"));
 
+var _debug = _interopRequireDefault(require("debug"));
+
 var _routes = require("./routes");
 
 var _services = require("./services");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _passport = require("./passport");
 
-_dotenv["default"].config({
-  path: _path["default"].join(__dirname, '/.env')
-}); // import { configPassport } from './passport';
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const log = (0, _debug.default)('LMS:app');
 
-var app = (0, _express["default"])(); // config app
-
-app.use(_bodyParser["default"].json());
-app.use(_bodyParser["default"].urlencoded({
-  extended: true
-}));
-app.use((0, _morgan["default"])('dev'));
-app.use(_express["default"].json());
-app.use(_express["default"].urlencoded({
-  extended: false
-}));
-app.use((0, _cookieParser["default"])());
-app.use(_express["default"]["static"](_path["default"].join(__dirname, 'public'))); // view engine setup
-
-app.set('views', _path["default"].join(__dirname, 'views'));
-app.set('view engine', 'ejs'); // config passport
-// configPassport(app);
-
-app.use('/users', _routes.userRouter);
-app.use(_routes.handleNotFound);
-app.use(_routes.handleError);
-
-_services.userService.findMany({}).then(function (users) {
-  return console.log('users', users);
-})["catch"](function (err) {
-  return console.log('error', err);
+_dotenv.default.config({
+  path: _path.default.join(__dirname, '/.env')
 });
 
+const app = (0, _express.default)(); // config app
+
+app.use(_bodyParser.default.json());
+app.use(_bodyParser.default.urlencoded({
+  extended: true
+}));
+app.use((0, _morgan.default)('dev'));
+app.use(_express.default.json());
+app.use(_express.default.urlencoded({
+  extended: false
+}));
+app.use((0, _cookieParser.default)());
+app.use(_express.default.static(_path.default.join(__dirname, 'public'))); // view engine setup
+
+app.set('views', _path.default.join(__dirname, 'views'));
+app.set('view engine', 'ejs'); // config passport
+
+(0, _passport.configPassport)(app);
+app.use('/users', _routes.userRouter);
+app.use(_routes.handleNotFound);
+app.use(_routes.handleError); // userService
+//   .createOne({
+//     username: 'tunh',
+//     password: 'tunh',
+//     fullname: 'Nguyen huu tu',
+//     phone: '0909090909',
+//     email: 'tunhbd1998@gmail.com',
+//     IDCardNumber: '333333333',
+//     university: 'university of science'
+//   })
+//   .then(user => {
+//     log('created user', user);
+//   })
+//   .catch(err => {
+//     log('create error', err);
+//   });
+// userService
+//   .findOne({ username: 'tunh' })
+//   .then(user => log('user', user))
+//   .catch(err => log('error', err));
+
 var _default = app;
-exports["default"] = _default;
+exports.default = _default;

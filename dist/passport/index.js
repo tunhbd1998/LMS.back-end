@@ -9,16 +9,16 @@ var _passport = _interopRequireDefault(require("passport"));
 
 var _strategies = require("./strategies");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var configPassport = function configPassport(app) {
-  app.use(_passport["default"].initialize());
+const configPassport = app => {
+  app.use(_passport.default.initialize());
 
-  _passport["default"].serializeUser(function (user, done) {
+  _passport.default.serializeUser((user, done) => {
     done(null, user);
   });
 
-  _passport["default"].deserializeUser(function (obj, done) {
+  _passport.default.deserializeUser((obj, done) => {
     done(null, obj);
   });
 

@@ -5,70 +5,134 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.userService = void 0;
 
+var _sequelize = _interopRequireDefault(require("sequelize"));
+
 var _database = require("../database");
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _password = require("../utils/password");
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+var _lab = require("../database/models/lab.model");
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+var _fields = require("../utils/fields");
 
-var UserService =
-/*#__PURE__*/
-function () {
-  function UserService() {
-    _classCallCheck(this, UserService);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-    this.connDB = _database.connDB;
-    this.userModel = _database.userModel;
+class UserService {
+  findOne(conditions) {
+    return new Promise((resolve, reject) => {
+      const conn = (0, _database.createConnection)();
+      const userModel = (0, _database.getUserModel)(conn);
+      conn.authenticate().then(() => {
+        userModel.findOne({
+          where: conditions,
+          attributes: {
+            exclude: ['id']
+          }
+        }).then(user => {
+          conn.close();
+          resolve(user ? user.dataValues : null);
+        }).catch(err => {
+          conn.close();
+          reject(err);
+        });
+      }).catch(err => reject(err));
+    });
   }
 
-  _createClass(UserService, [{
-    key: "findOne",
-    value: function findOne(condition) {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        _this.connDB.authenticate().then(function () {
-          _this.userModel.findOne(condition).then(function (user) {
-            _this.connDB.close();
-
-            resolve(user);
-          })["catch"](function (err) {
-            _this.connDB.close();
-
-            reject(err);
-          });
-        })["catch"](function (err) {
-          return reject(err);
+  findMany(conditions) {
+    return new Promise((resolve, reject) => {
+      const conn = (0, _database.createConnection)();
+      const userModel = (0, _database.getUserModel)(conn);
+      conn.authenticate().then(() => {
+        userModel.findAll({
+          where: conditions,
+          attributes: {
+            exclude: ['id']
+          }
+        }).then(users => {
+          conn.close();
+          resolve(users ? users.map(user => user.dataValues) : []);
+        }).catch(err => {
+          conn.close();
+          reject(err);
         });
-      });
-    }
-  }, {
-    key: "findMany",
-    value: function findMany(conditions) {
-      var _this2 = this;
+      }).catch(err => reject(err));
+    });
+  }
 
-      return new Promise(function (resolve, reject) {
-        _this2.connDB.authenticate().then(function () {
-          _this2.userModel.findAll(conditions).then(function (users) {
-            _this2.connDB.close();
-
-            resolve(users);
-          })["catch"](function (err) {
-            _this2.connDB.close();
-
-            reject(err);
-          });
-        })["catch"](function (err) {
-          return reject(err);
+  createOne(data) {
+    return new Promise((resolve, reject) => {
+      const conn = (0, _database.createConnection)();
+      const userModel = (0, _database.getUserModel)(conn);
+      conn.authenticate().then(async () => {
+        userModel.create({ ...data,
+          password: await (0, _password.hashPassword)(data.password)
+        }, {}).then(user => {
+          conn.close();
+          resolve(user.dataValues);
+        }).catch(err => {
+          conn.close();
+          reject(err);
         });
-      });
-    }
-  }]);
+      }).catch(err => reject(err));
+    });
+  }
 
-  return UserService;
-}();
+  signUpLab(user, lab) {
+    return new Promise((resolve, reject) => {
+      const conn = (0, _database.createConnection)();
+      const userModel = (0, _database.getUserModel)(conn);
+      const labModel = (0, _lab.getLabModel)(conn);
+      conn.authenticate().then(() => {
+        conn.transaction(async t => {
+          return userModel.create({ ...user,
+            isAccepted: false,
+            role: 1,
+            password: await (0, _password.hashPassword)(user.password)
+          }, {
+            transaction: t
+          }).then(userRes => {
+            return labModel.create({ ...lab,
+              id: (0, _fields.generateId)(),
+              admin: userRes.dataValues.username
+            }, {
+              transaction: t
+            }).then(labRes => {
+              console.log('labRes', labRes);
+              return {
+                user: labRes.dataValues,
+                lab: labRes.dataValues
+              };
+            });
+          });
+        }).then(({
+          user,
+          lab
+        }) => {
+          conn.close();
+          resolve({
+            user,
+            lab
+          });
+        }).catch(err => {
+          conn.close();
+          reject(err);
+        });
+      }).catch(err => reject(err));
+    });
+  }
 
-var userService = new UserService();
+  isExists(username) {
+    return new Promise((resolve, reject) => {
+      this.findOne({
+        username
+      }).then(user => {
+        resolve(user ? true : false);
+      }).catch(err => reject(err));
+    });
+  }
+
+}
+
+const userService = new UserService();
 exports.userService = userService;

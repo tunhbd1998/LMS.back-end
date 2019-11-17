@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 Object.defineProperty(exports, "userService", {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _user.userService;
   }
 });

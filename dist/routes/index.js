@@ -5,19 +5,19 @@ Object.defineProperty(exports, "__esModule", {
 });
 Object.defineProperty(exports, "handleNotFound", {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _notFound.handleNotFound;
   }
 });
 Object.defineProperty(exports, "handleError", {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _error.handleError;
   }
 });
 Object.defineProperty(exports, "userRouter", {
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _users.userRouter;
   }
 });

@@ -3,16 +3,16 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-Object.defineProperty(exports, "userModel", {
+Object.defineProperty(exports, "getUserModel", {
   enumerable: true,
-  get: function get() {
-    return _user.userModel;
+  get: function () {
+    return _user.getUserModel;
   }
 });
-Object.defineProperty(exports, "connDB", {
+Object.defineProperty(exports, "createConnection", {
   enumerable: true,
-  get: function get() {
-    return _connection.connDB;
+  get: function () {
+    return _connection.createConnection;
   }
 });
 

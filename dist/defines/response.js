@@ -5,13 +5,12 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.LMSResponse = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+class LMSResponse {
+  constructor(error, data) {
+    this.error = error;
+    this.data = data;
+  }
 
-var LMSResponse = function LMSResponse(error, data) {
-  _classCallCheck(this, LMSResponse);
-
-  this.error = error;
-  this.data = data;
-};
+}
 
 exports.LMSResponse = LMSResponse;

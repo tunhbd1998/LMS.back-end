@@ -15,48 +15,49 @@ var _lodash = require("lodash");
 
 var _config = require("../config");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _services = require("../services");
 
-var JWT = _config.PASSPORT.JWT; // const { userModel } = require("../database");
-// const { CustomError } = require('../defines/errors');
-// const { NEED_TO_REMOVE_FIELDS_TOKEN } = require('../defines/constants');
-// const { hashPassword } = require('../utils/password');
-// JWT Strategy
+var _password = require("../utils/password");
 
-var useJwtStrategy = function useJwtStrategy() {
-  var opts = {
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const {
+  JWT
+} = _config.PASSPORT; // JWT Strategy
+
+const useJwtStrategy = () => {
+  const opts = {
     secretOrKey: JWT.SECRET,
     jwtFromRequest: _passportJwt.ExtractJwt.fromAuthHeaderAsBearerToken()
   };
 
-  _passport["default"].use(new _passportJwt.Strategy(opts, function (jwtPayload, cb) {
+  _passport.default.use(new _passportJwt.Strategy(opts, (jwtPayload, cb) => {
     if (!jwtPayload) {
       return cb(null, null);
-    } // userModel
-    //   .findOne({ username: jwt_payload.username })
-    //   .then(user => cb(null, user))
-    //   .catch(err => cb(err, null));
+    }
 
+    _services.userService.findOne({
+      username: jwtPayload.username
+    }).then(user => cb(null, user)).catch(err => cb(err, null));
   }));
 }; // Local Strategy
 
 
 exports.useJwtStrategy = useJwtStrategy;
 
-var useLocalStrategy = function useLocalStrategy() {
-  _passport["default"].use(new _passportLocal.Strategy(function (username, password, cb) {
-    userModel.findOne({
-      username: username,
-      password: hashPassword(password)
-    }).then(function (user) {
-      if (!user) {
-        return cb(null, null);
+const useLocalStrategy = () => {
+  _passport.default.use(new _passportLocal.Strategy(async (username, password, cb) => {
+    console.log('password', password);
+
+    _services.userService.findOne({
+      username
+    }).then(async user => {
+      if (user && (await (0, _password.comparePassword)(password, user.password))) {
+        return cb(null, (0, _lodash.omit)(user, ['password', 'phone', 'email', 'university', 'IDCardNumber', 'IDNumber', 'labId', 'isTeacher']));
       }
 
-      cb(null, (0, _lodash.omit)(user, NEED_TO_REMOVE_FIELDS_TOKEN));
-    })["catch"](function (err) {
-      return cb(err, null);
-    });
+      return cb(null, null);
+    }).catch(err => cb(err, null));
   }));
 }; // // Google Strategy
 // const useGoogleStrategy = () => {

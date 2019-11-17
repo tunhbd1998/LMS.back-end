@@ -5,6 +5,12 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.handleNotFound = void 0;
 
-var handleNotFound = function handleNotFound(req, res, next) {};
+const handleNotFound = (req, res, next) => {
+  if (!req.error) {
+    return res.status(404).send();
+  }
+
+  next();
+};
 
 exports.handleNotFound = handleNotFound;
