@@ -1,10 +1,10 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import { omit, get } from 'lodash';
+import { omit } from 'lodash';
 import { PASSPORT } from '../config';
 import { userService } from '../services';
-import { hashPassword, comparePassword } from '../utils/password';
+import { comparePassword } from '../utils/password';
 
 const { JWT } = PASSPORT;
 
@@ -12,7 +12,7 @@ const { JWT } = PASSPORT;
 export const useJwtStrategy = () => {
   const opts = {
     secretOrKey: JWT.SECRET,
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   };
 
   passport.use(
@@ -22,7 +22,10 @@ export const useJwtStrategy = () => {
       }
 
       userService
-        .findOne({ username: jwtPayload.username })
+        .findOne({
+          conditions: { username: jwtPayload.username },
+          fields: ['username', 'role'],
+        })
         .then(user => cb(null, user))
         .catch(err => cb(err, null));
     })
@@ -33,24 +36,14 @@ export const useJwtStrategy = () => {
 export const useLocalStrategy = () => {
   passport.use(
     new LocalStrategy(async (username, password, cb) => {
-      console.log('password', password);
       userService
-        .findOne({ username })
+        .findOne({
+          conditions: { username },
+          fields: ['username', 'role', 'password', 'isAccepted'],
+        })
         .then(async user => {
           if (user && (await comparePassword(password, user.password))) {
-            return cb(
-              null,
-              omit(user, [
-                'password',
-                'phone',
-                'email',
-                'university',
-                'IDCardNumber',
-                'IDNumber',
-                'labId',
-                'isTeacher'
-              ])
-            );
+            return cb(null, omit(user, ['password']));
           }
 
           return cb(null, null);
