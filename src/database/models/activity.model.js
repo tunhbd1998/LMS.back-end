@@ -24,11 +24,11 @@ export const getActivityModel = conn => {
         defaultValue: null,
       },
       startTime: {
-        type: Sequelize.TIME,
+        type: Sequelize.DATE,
         defaultValue: null,
       },
       endTime: {
-        type: Sequelize.TIME,
+        type: Sequelize.DATE,
         defaultValue: null,
       },
       detail: {

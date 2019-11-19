@@ -14,11 +14,11 @@ export const getSchedulerModel = conn => {
         defaultValue: null,
       },
       beginTime: {
-        type: Sequelize.TIME,
+        type: Sequelize.DATE,
         defaultValue: null,
       },
       endTime: {
-        type: Sequelize.TIME,
+        type: Sequelize.DATE,
         defaultValue: null,
       },
       work: {
