@@ -9,7 +9,10 @@
     "dev": "NODE_ENV=development npm-run-all server",
     "build": "babel ./src --out-dir dist",
     "prod": "NODE_ENV=production npm-run-all build server:prod",
-    "debug": "nodemon"
+    "debug": "nodemon",
+    "db-sync:test": "TEST_SYNC_DB=true babel-node ./src/sync-db",
+    "db-sync": "babel-node ./src/sync-db",
+    "db-test": "TEST_SYNC_DB=true babel-node ./src/test-db"
   },
   "dependencies": {
     "bcrypt": "^3.0.6",
@@ -42,7 +45,8 @@
     "eslint": "^6.6.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
-    "nodemon": "^1.19.4"
+    "nodemon": "^1.19.4",
+    "sequelize-cli": "^5.5.1"
   },
   "keywords": [],
   "author": "",
