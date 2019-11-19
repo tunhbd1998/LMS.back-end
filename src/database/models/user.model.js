@@ -14,6 +14,10 @@ export const getUserModel = conn => {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      gender: {
+        type: Sequelize.TINYINT,
+        defaultValue: 1,
+      },
       avatarImage: {
         type: Sequelize.STRING,
         defaultValue: null,

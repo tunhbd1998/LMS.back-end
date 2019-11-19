@@ -119,7 +119,7 @@ router.post('/sign-up-lab', async (req, res, next) => {
 
   userService
     .signUpLab(user, lab)
-    .then(({ usr, lab }) => {
+    .then(({ user, lab }) => {
       if (!user || !lab) {
         return res.status(200).json(new LMSResponse(null, { status: false }));
       }

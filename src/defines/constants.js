@@ -7,13 +7,15 @@ export const REQUIRE_ADMIN_LAB_SIGN_UP_FIELDS = [
   'password',
   'phone',
   'email',
-  'university'
+  'university',
+  'gender',
 ];
 
 export const REQUIRE_LAB_SIGN_UP_FIELDS = [
   'name',
   'address',
-  'university'
+  'university',
+  'specialize',
   // 'confirmFile'
 ];
 
@@ -22,5 +24,6 @@ export const REQUIRE_MEMBER_SIGN_UP_FIELDS = [
   'password',
   'fullname',
   'email',
-  'IDCardNumber'
+  'IDCardNumber',
+  'gender',
 ];

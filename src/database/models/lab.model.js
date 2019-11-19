@@ -22,6 +22,10 @@ export const getLabModel = conn => {
         type: Sequelize.TEXT,
         allowNull: false,
       },
+      specialize: {
+        type: Sequelize.STRING,
+        defaultValue: null,
+      },
       // address: {
       //   type: Sequelize.UUID,
       //   allowNull: true,
