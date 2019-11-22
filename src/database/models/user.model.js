@@ -8,60 +8,68 @@ export const getUserModel = conn => {
     {
       username: {
         type: Sequelize.STRING,
-        primaryKey: true,
+        primaryKey: true
       },
       password: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: false
       },
       gender: {
         type: Sequelize.TINYINT,
-        defaultValue: 1,
+        defaultValue: 1
       },
       avatarImage: {
         type: Sequelize.STRING,
-        defaultValue: null,
+        defaultValue: null
+      },
+      avatarId: {
+        type: Sequelize.STRING,
+        defaultValue: null
       },
       fullname: {
         type: Sequelize.TEXT,
-        defaultValue: null,
+        defaultValue: null
       },
       phone: {
         type: Sequelize.STRING,
-        defaultValue: null,
+        defaultValue: null
       },
       email: {
         type: Sequelize.STRING,
-        defaultValue: null,
+        defaultValue: null
       },
       IDCardNumber: {
         type: Sequelize.STRING,
-        defaultValue: null,
+        defaultValue: null
       },
       university: {
         type: Sequelize.TEXT,
-        defaultValue: null,
+        defaultValue: null
       },
       IDNumber: {
         type: Sequelize.STRING,
-        defaultValue: null,
+        defaultValue: null
       },
       role: {
         type: Sequelize.TINYINT,
-        defaultValue: 0,
+        defaultValue: 0
+      },
+      job: {
+        type: Sequelize.TEXT,
+        defaultValue: null
       },
       isTeacher: {
         type: Sequelize.BOOLEAN,
-        defaultValue: false,
+        defaultValue: false
       },
       isAccepted: {
         type: Sequelize.BOOLEAN,
-        defaultValue: true,
-      },
+        defaultValue: true
+      }
     },
     {
       tableName: 'user',
-      timestamps: false,
+      timestamps: false
     }
   );
 };
