@@ -10,15 +10,19 @@ export const getRecruitmentModel = conn => {
     {
       id: {
         type: Sequelize.UUID,
-        primaryKey: true,
+        primaryKey: true
       },
       position: {
         type: Sequelize.TEXT,
-        defaultValue: null,
+        defaultValue: null
       },
       requirement: {
         type: Sequelize.TEXT,
-        defaultValue: null,
+        defaultValue: null
+      },
+      createdDate: {
+        type: Sequelize.DATE,
+        defaultValue: null
       },
       // forProject: {
       //   type: Sequelize.UUID,
@@ -38,8 +42,8 @@ export const getRecruitmentModel = conn => {
       // },
       isOpen: {
         type: Sequelize.TINYINT,
-        defaultValue: 1,
-      },
+        defaultValue: 1
+      }
     },
     { tableName: 'recruitment', timestamps: false }
   );
@@ -52,18 +56,18 @@ export const getRecruitmentModel = conn => {
   RecruitmentModel.belongsTo(LabModel, {
     foreignKey: 'forLab',
     targetKey: 'id',
-    timestamps: false,
+    timestamps: false
   });
   RecruitmentModel.belongsTo(ProjectModel, {
     foreignKey: 'forProject',
     targetKey: 'id',
-    timestamps: false,
+    timestamps: false
   });
   RecruitmentModel.belongsToMany(UserModel, {
     through: ApplyRecruitmentModel,
     foreignKey: 'recruitmentId',
     otherKey: 'userId',
-    timestamps: false,
+    timestamps: false
   });
 
   return RecruitmentModel;
