@@ -28,3 +28,22 @@ export const REQUIRE_MEMBER_SIGN_UP_FIELDS = [
   'IDCardNumber',
   'gender'
 ];
+
+export const REQUIRE_USER_GET_PROFILE_FIELDS = [
+  'avatarImage',
+  'avatarId',
+  'gender',
+  'fullname',
+  'phone',
+  'email',
+  'IDCardNumber',
+  'IDNumber',
+  'university',
+  'role',
+  'job'
+];
+
+export const REQUIRE_USER_UPDATE_PROFILE_FIELDS = [
+  ...REQUIRE_USER_GET_PROFILE_FIELDS,
+  'password'
+];

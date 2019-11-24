@@ -1,9 +1,11 @@
 import sequelize from 'sequelize';
+import { keys } from 'lodash';
 import { createConnection, getUserModel } from '../database';
 import { hashPassword } from '../utils/password';
 import { getLabModel } from '../database/models/lab.model';
 import { generateId } from '../utils/fields';
 import { baseService } from './base.service';
+import { REQUIRE_USER_GET_PROFILE_FIELDS } from '../defines/constants';
 
 class UserService {
   findOne({ conditions, fields }) {
@@ -28,15 +30,6 @@ class UserService {
         .catch(err => reject(err));
     });
   }
-  getProfile(username) {
-    return new Promise((resolve,reject) => {
-      this.findOne({ conditions: {username} , fields : [] })
-        .then(user => {
-          resolve(user.dataValues);
-        })
-        .catch(err => reject(err));
-    });
-  }
 
   isExists(username) {
     return new Promise((resolve, reject) => {
@@ -47,7 +40,6 @@ class UserService {
         .catch(err => reject(err));
     });
   }
-
 
   findMany({ conditions, fields, limit, offset, order }) {
     return new Promise((resolve, reject) => {
@@ -72,61 +64,12 @@ class UserService {
     });
   }
 
-  // findOne(conditions) {
-  //   return new Promise((resolve, reject) => {
-  //     const conn = createConnection();
-  //     const userModel = getUserModel(conn);
-
-  //     conn
-  //       .authenticate()
-  //       .then(() => {
-  //         userModel
-  //           .findOne({
-  //             where: conditions,
-  //             attributes: {
-  //               exclude: ['id'],
-  //             },
-  //           })
-  //           .then(user => {
-  //             conn.close();
-  //             resolve(user ? user.dataValues : null);
-  //           })
-  //           .catch(err => {
-  //             conn.close();
-  //             reject(err);
-  //           });
-  //       })
-  //       .catch(err => reject(err));
-  //   });
-  // }
-
-  // findMany(conditions) {
-  //   return new Promise((resolve, reject) => {
-  //     const conn = createConnection();
-  //     const userModel = getUserModel(conn);
-
-  //     conn
-  //       .authenticate()
-  //       .then(() => {
-  //         userModel
-  //           .findAll({
-  //             where: conditions,
-  //             attributes: {
-  //               exclude: ['id'],
-  //             },
-  //           })
-  //           .then(users => {
-  //             conn.close();
-  //             resolve(users ? users.map(user => user.dataValues) : []);
-  //           })
-  //           .catch(err => {
-  //             conn.close();
-  //             reject(err);
-  //           });
-  //       })
-  //       .catch(err => reject(err));
-  //   });
-  // }
+  async getProfile(username) {
+    return this.findOne({
+      conditions: { username },
+      fields: REQUIRE_USER_GET_PROFILE_FIELDS
+    });
+  }
 
   createOne(data) {
     return new Promise((resolve, reject) => {
@@ -153,7 +96,8 @@ class UserService {
         .catch(err => reject(err));
     });
   }
-  update(data) {
+
+  updateOne(username, data = {}) {
     return new Promise((resolve, reject) => {
       const conn = createConnection();
       const userModel = getUserModel(conn);
@@ -163,12 +107,23 @@ class UserService {
         .then(async () => {
           userModel
             .update(
-              { ...data },
-              {}
+              {
+                ...data,
+                password: data.password
+                  ? hashPassword(data.password)
+                  : undefined
+              },
+              {
+                where: {
+                  username
+                },
+                fields: keys(data)
+              }
             )
-            .then(user => {
+            .then(async res => {
               conn.close();
-              resolve(user.dataValues);
+              const user = await this.getProfile(username);
+              resolve(user);
             })
             .catch(err => {
               conn.close();
@@ -195,7 +150,7 @@ class UserService {
                   ...user,
                   isAccepted: false,
                   role: 1,
-                  password: await hashPassword(user.password),
+                  password: await hashPassword(user.password)
                 },
                 { transaction: t }
               ).then(userRes => {
@@ -203,14 +158,14 @@ class UserService {
                   {
                     ...lab,
                     id: generateId(),
-                    admin: userRes.dataValues.username,
+                    admin: userRes.dataValues.username
                   },
                   { transaction: t }
                 ).then(labRes => {
                   // console.log('labRes', labRes);
                   return {
                     user: labRes.dataValues,
-                    lab: labRes.dataValues,
+                    lab: labRes.dataValues
                   };
                 });
               });
@@ -223,16 +178,6 @@ class UserService {
               conn.close();
               reject(err);
             });
-        })
-        .catch(err => reject(err));
-    });
-  }
-
-  isExists(username) {
-    return new Promise((resolve, reject) => {
-      this.findOne({ conditions: { username }, fields: ['username'] })
-        .then(user => {
-          resolve(user ? true : false);
         })
         .catch(err => reject(err));
     });

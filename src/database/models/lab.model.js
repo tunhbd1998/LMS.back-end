@@ -12,19 +12,19 @@ export const getLabModel = conn => {
     {
       id: {
         type: Sequelize.UUID,
-        primaryKey: true,
+        primaryKey: true
       },
       name: {
         type: Sequelize.TEXT,
-        allowNull: false,
+        allowNull: false
       },
       university: {
         type: Sequelize.TEXT,
-        allowNull: false,
+        allowNull: false
       },
       specialize: {
         type: Sequelize.STRING,
-        defaultValue: null,
+        defaultValue: null
       },
       // address: {
       //   type: Sequelize.UUID,
@@ -36,16 +36,20 @@ export const getLabModel = conn => {
       // },
       labImage: {
         type: Sequelize.STRING,
-        defaultValue: null,
+        defaultValue: null
+      },
+      labImageId: {
+        type: Sequelize.STRING,
+        defaultValue: null
       },
       confirmFile: {
         type: Sequelize.STRING,
-        defaultValue: null,
+        defaultValue: null
       },
       description: {
         type: Sequelize.TEXT,
-        defaultValue: null,
-      },
+        defaultValue: null
+      }
       // admin: {
       //   type: Sequelize.STRING,
       //   defaultValue: null,
@@ -54,7 +58,7 @@ export const getLabModel = conn => {
     },
     {
       tableName: 'lab',
-      timestamps: false,
+      timestamps: false
     }
   );
 
@@ -68,25 +72,25 @@ export const getLabModel = conn => {
     foreignKey: 'address',
     targetKey: 'labId',
     // constraints: false,
-    timestamps: false,
+    timestamps: false
   });
   LabModel.belongsToMany(UserModel, {
     through: LabMemberModel,
     foreignKey: 'labId',
     otherKey: 'userId',
     // constraints: false,
-    timestamps: false,
+    timestamps: false
   });
   LabModel.belongsTo(UserModel, {
     foreignKey: 'admin',
     targetKey: 'username',
-    timestamps: false,
+    timestamps: false
   });
   LabModel.belongsToMany(SchedulerModel, {
     through: LabSchedulerModel,
     foreignKey: 'labId',
     otherKey: 'schedulerId',
-    timestamps: false,
+    timestamps: false
   });
 
   return LabModel;

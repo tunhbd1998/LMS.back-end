@@ -5,6 +5,7 @@ import { omit } from 'lodash';
 import { PASSPORT } from '../config';
 import { userService } from '../services';
 import { comparePassword } from '../utils/password';
+import { LMSError } from '../defines/errors';
 
 const { JWT } = PASSPORT;
 
@@ -12,19 +13,19 @@ const { JWT } = PASSPORT;
 export const useJwtStrategy = () => {
   const opts = {
     secretOrKey: JWT.SECRET,
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
   };
 
   passport.use(
     new JwtStrategy(opts, (jwtPayload, cb) => {
       if (!jwtPayload) {
-        return cb(null, null);
+        return cb(new LMSError(401, 'Unauthorization'), null);
       }
 
       userService
         .findOne({
           conditions: { username: jwtPayload.username },
-          fields: ['username', 'role'],
+          fields: ['username', 'role']
         })
         .then(user => cb(null, user))
         .catch(err => cb(err, null));
@@ -39,7 +40,7 @@ export const useLocalStrategy = () => {
       userService
         .findOne({
           conditions: { username },
-          fields: ['username', 'role', 'password', 'isAccepted'],
+          fields: ['username', 'role', 'password', 'isAccepted']
         })
         .then(async user => {
           if (user && (await comparePassword(password, user.password))) {

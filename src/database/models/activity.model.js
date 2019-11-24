@@ -9,32 +9,36 @@ export const getActivityModel = conn => {
     {
       id: {
         type: Sequelize.UUID,
-        primaryKey: true,
+        primaryKey: true
       },
       name: {
         type: Sequelize.TEXT,
-        allowNull: false,
+        allowNull: false
       },
       address: {
         type: Sequelize.TEXT,
-        defaultValue: null,
+        defaultValue: null
       },
       image: {
         type: Sequelize.STRING,
-        defaultValue: null,
+        defaultValue: null
+      },
+      imageId: {
+        type: Sequelize.STRING,
+        defaultValue: null
       },
       startTime: {
         type: Sequelize.DATE,
-        defaultValue: null,
+        defaultValue: null
       },
       endTime: {
         type: Sequelize.DATE,
-        defaultValue: null,
+        defaultValue: null
       },
       detail: {
         type: Sequelize.TEXT,
-        defaultValue: null,
-      },
+        defaultValue: null
+      }
       // LabId: {
       //   type: Sequelize.UUID,
       //   allowNull: false,
@@ -55,13 +59,13 @@ export const getActivityModel = conn => {
     foreignKey: 'labId',
     targetKey: 'id',
     // constraints: false,
-    timestamps: false,
+    timestamps: false
   });
   ActivityModel.belongsToMany(UserModel, {
     through: TakePartInActivityModel,
     foreignKey: 'activityId',
     otherKey: 'userId',
-    timestamps: false,
+    timestamps: false
   });
 
   return ActivityModel;

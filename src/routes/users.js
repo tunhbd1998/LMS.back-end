@@ -6,11 +6,13 @@ import { LMSResponse } from '../defines/response';
 import {
   REQUIRE_MEMBER_SIGN_UP_FIELDS,
   REQUIRE_ADMIN_LAB_SIGN_UP_FIELDS,
-  REQUIRE_LAB_SIGN_UP_FIELDS
+  REQUIRE_LAB_SIGN_UP_FIELDS,
+  REQUIRE_USER_UPDATE_PROFILE_FIELDS
 } from '../defines/constants';
 import { PASSPORT, USER_ROLES } from '../config';
 import { userService } from '../services';
 import { isEnoughFields } from '../utils/fields';
+import { withAuth } from '../middlewares/with-auth-middleware';
 
 const router = express.Router();
 const { JWT } = PASSPORT;
@@ -66,7 +68,7 @@ router.post('/sign-in', (req, res, next) => {
 router.post('/sign-up-member', async (req, res, next) => {
   const data = req.body;
 
-  if (!isEnoughFields(data, REQUIRE_MEMBER_SIGN_UP_FIELDS)) {
+  if (!isEnoughFields(data, REQUIRE_MEMBER_SIGN_UP_FIELDS, true)) {
     req.error = new LMSError(400, 'Bad request');
     return next();
   }
@@ -100,8 +102,8 @@ router.post('/sign-up-lab', async (req, res, next) => {
 
   if (
     !(
-      isEnoughFields(user, REQUIRE_ADMIN_LAB_SIGN_UP_FIELDS) &&
-      isEnoughFields(lab, REQUIRE_LAB_SIGN_UP_FIELDS)
+      isEnoughFields(user, REQUIRE_ADMIN_LAB_SIGN_UP_FIELDS, true) &&
+      isEnoughFields(lab, REQUIRE_LAB_SIGN_UP_FIELDS, true)
     )
   ) {
     req.error = new LMSError(400, 'Bad request');
@@ -136,6 +138,33 @@ router.post('/check-exists-username', async (req, res, next) => {
   const flag = await userService.isExists(req.body.username);
 
   res.status(200).json(new LMSResponse(null, { exists: flag }));
+});
+
+router.get('/profile', withAuth, (req, res, next) => {
+  userService
+    .getProfile(req.user.username)
+    .then(profile => res.status(200).json(new LMSResponse(null, { profile })))
+    .catch(err => {
+      req.error = new LMSError(500, 'Server error');
+      next();
+    });
+});
+
+router.post('/profile', withAuth, (req, res, next) => {
+  const data = req.body;
+
+  if (isEnoughFields(data, REQUIRE_USER_UPDATE_PROFILE_FIELDS)) {
+    userService
+      .updateOne(req.user.username, data)
+      .then(user => {
+        res.status(200).json(new LMSResponse(null, { profile: user }));
+      })
+      .catch(err => {
+        console.log('err', err);
+        req.error = new LMSError(500, 'Server error');
+        next();
+      });
+  }
 });
 
 export const userRouter = router;
