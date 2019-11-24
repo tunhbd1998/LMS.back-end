@@ -6,7 +6,7 @@ import { LMSResponse } from '../defines/response';
 import {
   REQUIRE_MEMBER_SIGN_UP_FIELDS,
   REQUIRE_ADMIN_LAB_SIGN_UP_FIELDS,
-  REQUIRE_LAB_SIGN_UP_FIELDS,
+  REQUIRE_LAB_SIGN_UP_FIELDS
 } from '../defines/constants';
 import { PASSPORT, USER_ROLES } from '../config';
 import { userService } from '../services';
@@ -31,7 +31,7 @@ router.post('/sign-in', (req, res, next) => {
         new LMSResponse(null, {
           token: null,
           message: 'Your account is incorrect',
-          role: null,
+          role: null
         })
       );
     }
@@ -41,7 +41,7 @@ router.post('/sign-in', (req, res, next) => {
         new LMSResponse(null, {
           token: null,
           role: null,
-          message: 'Your account has not accepted by Admin',
+          message: 'Your account has not accepted by Admin'
         })
       );
     }
@@ -56,7 +56,7 @@ router.post('/sign-in', (req, res, next) => {
         new LMSResponse(null, {
           token: jwt.sign(user, JWT.SECRET),
           role: USER_ROLES[user.role],
-          message: 'Sign in successfully',
+          message: 'Sign in successfully'
         })
       );
     });
@@ -75,7 +75,7 @@ router.post('/sign-up-member', async (req, res, next) => {
     return res.status(200).json(
       new LMSResponse(null, {
         status: false,
-        message: 'username have exists',
+        message: 'username have exists'
       })
     );
   }
@@ -112,7 +112,7 @@ router.post('/sign-up-lab', async (req, res, next) => {
     return res.status(200).json(
       new LMSResponse(null, {
         status: false,
-        message: 'username have exists',
+        message: 'username have exists'
       })
     );
   }
