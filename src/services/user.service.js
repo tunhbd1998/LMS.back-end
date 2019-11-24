@@ -28,6 +28,26 @@ class UserService {
         .catch(err => reject(err));
     });
   }
+  getProfile(username) {
+    return new Promise((resolve,reject) => {
+      this.findOne({ conditions: {username} , fields : [] })
+        .then(user => {
+          resolve(user.dataValues);
+        })
+        .catch(err => reject(err));
+    });
+  }
+
+  isExists(username) {
+    return new Promise((resolve, reject) => {
+      this.findOne({ conditions: { username }, fields: ['username'] })
+        .then(user => {
+          resolve(user ? true : false);
+        })
+        .catch(err => reject(err));
+    });
+  }
+
 
   findMany({ conditions, fields, limit, offset, order }) {
     return new Promise((resolve, reject) => {
@@ -119,6 +139,31 @@ class UserService {
           userModel
             .create(
               { ...data, password: await hashPassword(data.password) },
+              {}
+            )
+            .then(user => {
+              conn.close();
+              resolve(user.dataValues);
+            })
+            .catch(err => {
+              conn.close();
+              reject(err);
+            });
+        })
+        .catch(err => reject(err));
+    });
+  }
+  update(data) {
+    return new Promise((resolve, reject) => {
+      const conn = createConnection();
+      const userModel = getUserModel(conn);
+
+      conn
+        .authenticate()
+        .then(async () => {
+          userModel
+            .update(
+              { ...data },
               {}
             )
             .then(user => {
