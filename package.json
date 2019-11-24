@@ -10,9 +10,10 @@
     "build": "babel ./src --out-dir dist",
     "prod": "NODE_ENV=production npm-run-all build server:prod",
     "debug": "nodemon",
+    "debug:local": "TEST_SYNC_DB=true nodemon",
     "db-sync:test": "TEST_SYNC_DB=true babel-node ./src/sync-db",
     "db-sync": "babel-node ./src/sync-db",
-    "db-test": "TEST_SYNC_DB=true babel-node ./src/test-db"
+    "db-test": "TEST_SYNC_DB=true DEBUG=LMS:* babel-node ./src/test-db"
   },
   "dependencies": {
     "bcrypt": "^3.0.6",
