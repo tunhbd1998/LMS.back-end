@@ -25,7 +25,7 @@ export const useJwtStrategy = () => {
       userService
         .findOne({
           conditions: { username: jwtPayload.username },
-          // fields: ['username', 'role']
+          fields: ['username', 'role']
         })
         .then(user => cb(null, user))
         .catch(err => cb(err, null));
