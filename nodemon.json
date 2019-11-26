@@ -1,5 +1,5 @@
 {
-  "exec": "DEBUG=LMS:* yarn run dev",
+  "exec": "cross-env DEBUG=LMS:* yarn run dev",
   "watch": ["src/*"],
   "ext": "js, html, css, json"
 }

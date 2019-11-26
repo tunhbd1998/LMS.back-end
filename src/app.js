@@ -6,7 +6,13 @@ import logger from 'morgan';
 import dotenv from 'dotenv';
 import debugModule from 'debug';
 import cors from 'cors';
-import { handleNotFound, handleError, userRouter, labRouter } from './routes';
+import {
+  handleNotFound,
+  handleError,
+  userRouter,
+  labRouter,
+  homeRouter
+} from './routes';
 import { userService } from './services';
 import { configPassport } from './passport';
 
@@ -32,6 +38,7 @@ app.set('view engine', 'ejs');
 // config passport
 configPassport(app);
 
+app.use('/', homeRouter);
 app.use('/users', userRouter);
 app.use('/labs', labRouter);
 app.use(handleNotFound);

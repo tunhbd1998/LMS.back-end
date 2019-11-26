@@ -23,6 +23,8 @@ var _services = require("../services");
 
 var _fields = require("../utils/fields");
 
+var _withAuthMiddleware = require("../middlewares/with-auth-middleware");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const router = _express.default.Router();
@@ -77,7 +79,7 @@ router.post('/sign-in', (req, res, next) => {
 router.post('/sign-up-member', async (req, res, next) => {
   const data = req.body;
 
-  if (!(0, _fields.isEnoughFields)(data, _constants.REQUIRE_MEMBER_SIGN_UP_FIELDS)) {
+  if (!(0, _fields.isEnoughFields)(data, _constants.REQUIRE_MEMBER_SIGN_UP_FIELDS, true)) {
     req.error = new _errors.LMSError(400, 'Bad request');
     return next();
   }
@@ -92,16 +94,12 @@ router.post('/sign-up-member', async (req, res, next) => {
   _services.userService.createOne(data).then(user => {
     if (user) {
       return res.status(200).json(new _response.LMSResponse(null, {
-        data: {
-          status: true
-        }
+        status: true
       }));
     }
 
     res.status(200).json(new _response.LMSResponse(null, {
-      data: {
-        status: false
-      }
+      status: false
     }));
   }).catch(err => {
     req.error = new _errors.LMSError(500, err);
@@ -114,7 +112,7 @@ router.post('/sign-up-lab', async (req, res, next) => {
     lab
   } = req.body;
 
-  if (!((0, _fields.isEnoughFields)(user, _constants.REQUIRE_ADMIN_LAB_SIGN_UP_FIELDS) && (0, _fields.isEnoughFields)(lab, _constants.REQUIRE_LAB_SIGN_UP_FIELDS))) {
+  if (!((0, _fields.isEnoughFields)(user, _constants.REQUIRE_ADMIN_LAB_SIGN_UP_FIELDS, true) && (0, _fields.isEnoughFields)(lab, _constants.REQUIRE_LAB_SIGN_UP_FIELDS, true))) {
     req.error = new _errors.LMSError(400, 'Bad request');
     return next();
   }
@@ -127,7 +125,7 @@ router.post('/sign-up-lab', async (req, res, next) => {
   }
 
   _services.userService.signUpLab(user, lab).then(({
-    usr,
+    user,
     lab
   }) => {
     if (!user || !lab) {
@@ -149,6 +147,29 @@ router.post('/check-exists-username', async (req, res, next) => {
   res.status(200).json(new _response.LMSResponse(null, {
     exists: flag
   }));
+});
+router.get('/profile', _withAuthMiddleware.withAuth, (req, res, next) => {
+  _services.userService.getProfile(req.user.username).then(profile => res.status(200).json(new _response.LMSResponse(null, {
+    profile
+  }))).catch(err => {
+    req.error = new _errors.LMSError(500, 'Server error');
+    next();
+  });
+});
+router.post('/profile', _withAuthMiddleware.withAuth, (req, res, next) => {
+  const data = req.body;
+
+  if ((0, _fields.isEnoughFields)(data, _constants.REQUIRE_USER_UPDATE_PROFILE_FIELDS)) {
+    _services.userService.updateOne(req.user.username, data).then(user => {
+      res.status(200).json(new _response.LMSResponse(null, {
+        profile: user
+      }));
+    }).catch(err => {
+      console.log('err', err);
+      req.error = new _errors.LMSError(500, 'Server error');
+      next();
+    });
+  }
 });
 const userRouter = router;
 exports.userRouter = userRouter;
