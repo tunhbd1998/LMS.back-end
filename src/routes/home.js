@@ -1,9 +1,9 @@
-// import express from 'express';
+import express from 'express';
 
-// const router = express.Router();
+const router = express.Router();
 
-// router.get('/', function(req, res, next) {
-//   res.render('index', { title: 'Express' });
-// });
+router.get('/', (req, res, next) => {
+  res.status(200).send('hello world');
+});
 
-// module.exports = router;
+export const homeRouter = router;

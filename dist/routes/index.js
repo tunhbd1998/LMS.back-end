@@ -3,6 +3,12 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+Object.defineProperty(exports, "homeRouter", {
+  enumerable: true,
+  get: function () {
+    return _home.homeRouter;
+  }
+});
 Object.defineProperty(exports, "handleNotFound", {
   enumerable: true,
   get: function () {
@@ -27,6 +33,8 @@ Object.defineProperty(exports, "labRouter", {
     return _labs.labRouter;
   }
 });
+
+var _home = require("./home");
 
 var _notFound = require("./not-found");
 
