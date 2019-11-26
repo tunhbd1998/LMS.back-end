@@ -18,10 +18,10 @@ export const useJwtStrategy = () => {
 
   passport.use(
     new JwtStrategy(opts, (jwtPayload, cb) => {
+      console.log(jwtPayload);
       if (!jwtPayload) {
         return cb(new LMSError(401, 'Unauthorization'), null);
       }
-
       userService
         .findOne({
           conditions: { username: jwtPayload.username },

@@ -13,6 +13,8 @@ import { PASSPORT, USER_ROLES } from '../config';
 import { userService } from '../services';
 import { isEnoughFields } from '../utils/fields';
 import { withAuth } from '../middlewares/with-auth-middleware';
+import { uploadImageFile } from '../multer';
+import { uploadImage } from '../utils/uploadFile';
 
 const router = express.Router();
 const { JWT } = PASSPORT;
@@ -167,4 +169,8 @@ router.post('/profile', withAuth, (req, res, next) => {
   }
 });
 
+router.post('/upload-avatar', withAuth, uploadImageFile,
+  (req, res) => {
+    uploadImage(req, res);
+});
 export const userRouter = router;
