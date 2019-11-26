@@ -55,6 +55,7 @@ app.set('view engine', 'ejs'); // config passport
 
 (0, _passport.configPassport)(app);
 app.use('/users', _routes.userRouter);
+app.use('/labs', _routes.labRouter);
 app.use(_routes.handleNotFound);
 app.use(_routes.handleError); // userService
 //   .createOne({

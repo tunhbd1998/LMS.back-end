@@ -21,9 +21,17 @@ Object.defineProperty(exports, "userRouter", {
     return _users.userRouter;
   }
 });
+Object.defineProperty(exports, "labRouter", {
+  enumerable: true,
+  get: function () {
+    return _labs.labRouter;
+  }
+});
 
 var _notFound = require("./not-found");
 
 var _error = require("./error");
 
 var _users = require("./users");
+
+var _labs = require("./labs");

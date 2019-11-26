@@ -9,6 +9,8 @@ var _sequelize = _interopRequireDefault(require("sequelize"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// import { getRecruitmentModel } from './recruitment.model';
+// import { getApplyRecruitmentModel } from './apply-recruitment.model';
 const getUserModel = conn => {
   return conn.define('user', {
     username: {
@@ -16,9 +18,18 @@ const getUserModel = conn => {
       primaryKey: true
     },
     password: {
-      type: _sequelize.default.STRING
+      type: _sequelize.default.STRING,
+      allowNull: false
+    },
+    gender: {
+      type: _sequelize.default.TINYINT,
+      defaultValue: 1
     },
     avatarImage: {
+      type: _sequelize.default.STRING,
+      defaultValue: null
+    },
+    avatarId: {
       type: _sequelize.default.STRING,
       defaultValue: null
     },
@@ -50,18 +61,14 @@ const getUserModel = conn => {
       type: _sequelize.default.TINYINT,
       defaultValue: 0
     },
+    job: {
+      type: _sequelize.default.TEXT,
+      defaultValue: null
+    },
     isTeacher: {
       type: _sequelize.default.BOOLEAN,
       defaultValue: false
     },
-    // labId: {
-    //   type: Sequelize.UUID,
-    //   defaultValue: null,
-    //   references: {
-    //     model: getLabModel(conn),
-    //     key: 'id'
-    //   }
-    // },
     isAccepted: {
       type: _sequelize.default.BOOLEAN,
       defaultValue: true

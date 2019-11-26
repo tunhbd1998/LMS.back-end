@@ -8,6 +8,13 @@ module.exports = {
     DB_NAME: 'SvRVvOOHHg',
     TYPE: 'mysql'
   },
+  TEST_DATABASE: {
+    HOST: 'localhost',
+    USER: 'tunh',
+    PASS: 'NHT13101997',
+    DB_NAME: 'lms',
+    TYPE: 'mysql'
+  },
   PASSPORT: {
     JWT: {
       SECRET: 'VTP3-2019'

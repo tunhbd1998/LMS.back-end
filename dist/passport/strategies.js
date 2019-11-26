@@ -19,6 +19,8 @@ var _services = require("../services");
 
 var _password = require("../utils/password");
 
+var _errors = require("../defines/errors");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const {
@@ -33,11 +35,14 @@ const useJwtStrategy = () => {
 
   _passport.default.use(new _passportJwt.Strategy(opts, (jwtPayload, cb) => {
     if (!jwtPayload) {
-      return cb(null, null);
+      return cb(new _errors.LMSError(401, 'Unauthorization'), null);
     }
 
     _services.userService.findOne({
-      username: jwtPayload.username
+      conditions: {
+        username: jwtPayload.username
+      },
+      fields: ['username', 'role']
     }).then(user => cb(null, user)).catch(err => cb(err, null));
   }));
 }; // Local Strategy
@@ -47,13 +52,14 @@ exports.useJwtStrategy = useJwtStrategy;
 
 const useLocalStrategy = () => {
   _passport.default.use(new _passportLocal.Strategy(async (username, password, cb) => {
-    console.log('password', password);
-
     _services.userService.findOne({
-      username
+      conditions: {
+        username
+      },
+      fields: ['username', 'role', 'password', 'isAccepted']
     }).then(async user => {
       if (user && (await (0, _password.comparePassword)(password, user.password))) {
-        return cb(null, (0, _lodash.omit)(user, ['password', 'phone', 'email', 'university', 'IDCardNumber', 'IDNumber', 'labId', 'isTeacher']));
+        return cb(null, (0, _lodash.omit)(user, ['password']));
       }
 
       return cb(null, null);
