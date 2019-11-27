@@ -22,4 +22,12 @@ router.get('/member-recruitment/:labId', (req, res, next) => {
     });
 });
 
+router.get('/lab',(req,res,next) =>{
+  const { page, pageSize } = req.query;
+  const limit = pageSize;
+  const offset = (page - 1) * pageSize;
+ 
+  labService.findAllLab().then(lab => console.log(lab))
+    .catch(err => console.log(err))
+});
 export const labRouter = router;
