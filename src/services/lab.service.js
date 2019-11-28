@@ -20,8 +20,8 @@ class LabService {
   //     const conn = createConnection()
   //   })
   // }
-
-  findMemberRecruitments(labId, limit = null, offset = null, order = null) {
+  // status: 0 - closed, 1 - opened, 2 - all
+  countMemberRecruitments(labId = null, status = 0) {
     return new Promise((resolve, reject) => {
       const conn = createConnection();
       const RecruitmentModel = getRecruitmentModel(conn);
@@ -29,14 +29,45 @@ class LabService {
       baseService
         .findMany(RecruitmentModel, {
           conditions: {
-            forLab: labId,
             forProject: null,
-            isOpen: 1,
+            ...(labId ? { labId } : {}),
+            ...(status >= 2 || status < 0 ? {} : { isOpen: status })
+          },
+          fields: ['id']
+        })
+        .then(recruitments => {
+          conn.close();
+          resolve(recruitments.length);
+        })
+        .catch(err => {
+          conn.close();
+          reject(err);
+        });
+    });
+  }
+
+  findMemberRecruitments(
+    labId = null,
+    status = 2,
+    limit = null,
+    offset = null,
+    order = null
+  ) {
+    return new Promise((resolve, reject) => {
+      const conn = createConnection();
+      const RecruitmentModel = getRecruitmentModel(conn);
+
+      baseService
+        .findMany(RecruitmentModel, {
+          conditions: {
+            forProject: null,
+            ...(labId ? { labId } : {}),
+            ...(status >= 2 || status < 0 ? {} : { isOpen: status })
           },
           fields: ['id', 'forLab', 'position'],
           limit,
           offset,
-          order,
+          order
         })
         .then(async recruitments => {
           const LabModel = getLabModel(conn);
@@ -46,16 +77,20 @@ class LabService {
                 ...rcm,
                 forLab: await baseService.findOne(LabModel, {
                   conditions: {
-                    id: rcm.forLab,
+                    id: rcm.forLab
                   },
-                  fields: ['id', 'name', 'labImage'],
-                }),
+                  fields: ['id', 'name', 'labImage']
+                })
               };
             })
           );
+          conn.close();
           resolve(recruits);
         })
-        .catch(err => reject(err));
+        .catch(err => {
+          conn.close();
+          reject(err);
+        });
     });
   }
 }
