@@ -5,7 +5,7 @@ import { LMSError } from '../defines/errors';
 
 const router = express.Router();
 
-router.get('/member-recruitment/:labId', (req, res, next) => {
+router.get('/:labId/member-recruitment', (req, res, next) => {
   const { page, pageSize } = req.query;
   const limit = pageSize;
   const offset = (page - 1) * pageSize;
