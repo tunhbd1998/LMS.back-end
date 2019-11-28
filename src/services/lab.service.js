@@ -8,56 +8,17 @@ class LabService {
   //   return new Promise((resolve, reject) => {
   //     const conn = createConnection();
   //     const RecruitmentModel = getRecruitmentModel(conn);
-
   //     baseService.findMany({
   //       conditions,
   //     });
   //   });
   // }
-
   // findOne({conditions, fields}) {
   //   return new Promise((resolve, reject) => {
   //     const conn = createConnection()
   //   })
   // }
-
-  findMemberRecruitments(labId, limit = null, offset = null, order = null) {
-    return new Promise((resolve, reject) => {
-      const conn = createConnection();
-      const RecruitmentModel = getRecruitmentModel(conn);
-
-      baseService
-        .findMany(RecruitmentModel, {
-          conditions: {
-            forLab: labId,
-            forProject: null,
-            isOpen: 1,
-          },
-          fields: ['id', 'forLab', 'position'],
-          limit,
-          offset,
-          order,
-        })
-        .then(async recruitments => {
-          const LabModel = getLabModel(conn);
-          const recruits = await Promise.all(
-            recruitments.map(async rcm => {
-              return {
-                ...rcm,
-                forLab: await baseService.findOne(LabModel, {
-                  conditions: {
-                    id: rcm.forLab,
-                  },
-                  fields: ['id', 'name', 'labImage'],
-                }),
-              };
-            })
-          );
-          resolve(recruits);
-        })
-        .catch(err => reject(err));
-    });
-  }
+  // status: 0 - closed, 1 - opened, 2 - all
 }
 
 export const labService = new LabService();
