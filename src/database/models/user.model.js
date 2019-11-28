@@ -18,6 +18,10 @@ export const getUserModel = conn => {
         type: Sequelize.TINYINT,
         defaultValue: 1
       },
+      birthday: {
+        type: Sequelize.DATE,
+        defaultValue: null
+      },
       avatarImage: {
         type: Sequelize.STRING,
         defaultValue: null
