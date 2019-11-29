@@ -6,6 +6,7 @@ import { getLabModel } from '../database/models/lab.model';
 import { generateId } from '../utils/fields';
 import { baseService } from './base.service';
 import { REQUIRE_USER_GET_PROFILE_FIELDS } from '../defines/constants';
+import { getLabAddressModel } from '../database/models/lab-address.model';
 
 class UserService {
   findOne({ conditions, fields }) {
@@ -137,6 +138,7 @@ class UserService {
   signUpLab(user, lab) {
     return new Promise((resolve, reject) => {
       const conn = createConnection();
+      const LabAddressModel = getLabAddressModel(conn);
       const UserModel = getUserModel(conn);
       const LabModel = getLabModel(conn);
 
@@ -154,19 +156,29 @@ class UserService {
                 },
                 { transaction: t }
               ).then(userRes => {
-                return LabModel.create(
+                return LabAddressModel.create(
                   {
-                    ...lab,
-                    id: generateId(),
-                    admin: userRes.dataValues.username
+                    labId: generateId(),
+                    province: lab.address.province || null,
+                    detail: lab.address.detail || null
                   },
                   { transaction: t }
-                ).then(labRes => {
-                  // console.log('labRes', labRes);
-                  return {
-                    user: labRes.dataValues,
-                    lab: labRes.dataValues
-                  };
+                ).then(labAddressRes => {
+                  return LabModel.create(
+                    {
+                      ...lab,
+                      address: labAddressRes.dataValues.labId,
+                      id: labAddressRes.dataValues.labId,
+                      admin: userRes.dataValues.username
+                    },
+                    { transaction: t }
+                  ).then(labRes => {
+                    // console.log('labRes', labRes);
+                    return {
+                      user: labRes.dataValues,
+                      lab: labRes.dataValues
+                    };
+                  });
                 });
               });
             })

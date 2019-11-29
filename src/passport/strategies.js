@@ -18,7 +18,7 @@ export const useJwtStrategy = () => {
 
   passport.use(
     new JwtStrategy(opts, (jwtPayload, cb) => {
-      console.log(jwtPayload);
+      console.log('jwt payload: ', jwtPayload);
       if (!jwtPayload) {
         return cb(new LMSError(401, 'Unauthorization'), null);
       }

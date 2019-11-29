@@ -7,24 +7,24 @@ export const getToolModel = conn => {
     {
       id: {
         type: Sequelize.UUID,
-        primaryKey: true,
+        primaryKey: true
       },
       name: {
         type: Sequelize.TEXT,
-        allowNull: false,
+        allowNull: false
       },
       price: {
         type: Sequelize.INTEGER,
-        defaultValue: 0,
+        defaultValue: 0
       },
       amount: {
         type: Sequelize.TINYINT,
-        defaultValue: 0,
+        defaultValue: 0
       },
       description: {
         type: Sequelize.TEXT,
-        defaultValue: null,
-      },
+        defaultValue: null
+      }
       // labId: {
       //   type: Sequelize.UUID,
       //   allowNull: false,
@@ -42,7 +42,7 @@ export const getToolModel = conn => {
   ToolModel.belongsTo(LabModel, {
     foreignKey: 'labId',
     targetKey: 'id',
-    timestamps: false,
+    timestamps: false
   });
 
   return ToolModel;
