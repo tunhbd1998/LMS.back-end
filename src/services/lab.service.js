@@ -19,6 +19,30 @@ class LabService {
   //   })
   // }
   // status: 0 - closed, 1 - opened, 2 - all
+
+
+  
+  getLabById(labId) {
+
+
+    return new Promise((resolve,reject) =>{
+      const conn = createConnection();
+      const LabModel = getLabModel(conn);
+      baseService.findOne(LabModel,{
+        conditions: {id : labId},
+        fields : [ 'id' , 'name' , 'university' ,'specialize' , 'confirmFile','description'],
+     
+      })
+      .then(labs => {
+        conn.close();
+        resolve(labs) 
+      })
+      .catch(err => {
+        conn.close();
+        reject(err)
+      });
+    });
+  }
 }
 
 export const labService = new LabService();
