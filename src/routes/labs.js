@@ -7,11 +7,16 @@ const router = express.Router();
 
 export const labRouter = router;
 
+router.get('/lab',(req,res,next) =>{
+  const { page, pageSize } = req.query;
+  const limit = pageSize;
+  const offset = (page - 1) * pageSize;
+ 
+  labService.findAllLab().then(lab => console.log(lab))
+    .catch(err => console.log(err))
+});
 
-
-
-
-  router.get('/labs/:id', withAuth, (req, res, next) => {
+ router.get('/labs/:id', withAuth, (req, res, next) => {
     labService
       .getLabById(req.params)
       .then(lab => res.status(200).json(new LMSResponse(null, { lab })))
@@ -21,3 +26,5 @@ export const labRouter = router;
         next();
       });
   });
+
+export const labRouter = router;

@@ -43,6 +43,24 @@ class LabService {
       });
     });
   }
+  
+  findAllLab(limit = null, offset = null, order = null){
+    return new Promise((resolve,reject) => {
+      const conn = createConnection();
+      const LabModel = getLabModel(conn);
+
+      baseService.findMany(LabModel,{conditions: null,fields: ['name','university','specialize'],
+                  limit,
+                  offsetl,
+                  order,
+                })
+                  .then(labs => resolve(labs))
+                  .catch(err => reject(err));
+
+    });
+  }
 }
+
+
 
 export const labService = new LabService();
