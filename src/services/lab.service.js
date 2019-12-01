@@ -8,54 +8,39 @@ class LabService {
   //   return new Promise((resolve, reject) => {
   //     const conn = createConnection();
   //     const RecruitmentModel = getRecruitmentModel(conn);
-
   //     baseService.findMany({
   //       conditions,
   //     });
   //   });
   // }
-
   // findOne({conditions, fields}) {
   //   return new Promise((resolve, reject) => {
   //     const conn = createConnection()
   //   })
   // }
+  // status: 0 - closed, 1 - opened, 2 - all
 
-  findMemberRecruitments(labId, limit = null, offset = null, order = null) {
-    return new Promise((resolve, reject) => {
+
+  
+  getLabById(labId) {
+
+
+    return new Promise((resolve,reject) =>{
       const conn = createConnection();
-      const RecruitmentModel = getRecruitmentModel(conn);
-
-      baseService
-        .findMany(RecruitmentModel, {
-          conditions: {
-            forLab: labId,
-            forProject: null,
-            isOpen: 1,
-          },
-          fields: ['id', 'forLab', 'position'],
-          limit,
-          offset,
-          order,
-        })
-        .then(async recruitments => {
-          const LabModel = getLabModel(conn);
-          const recruits = await Promise.all(
-            recruitments.map(async rcm => {
-              return {
-                ...rcm,
-                forLab: await baseService.findOne(LabModel, {
-                  conditions: {
-                    id: rcm.forLab,
-                  },
-                  fields: ['id', 'name', 'labImage'],
-                }),
-              };
-            })
-          );
-          resolve(recruits);
-        })
-        .catch(err => reject(err));
+      const LabModel = getLabModel(conn);
+      baseService.findOne(LabModel,{
+        conditions: {id : labId},
+        fields : [ 'id' , 'name' , 'university' ,'specialize' , 'confirmFile','description'],
+     
+      })
+      .then(labs => {
+        conn.close();
+        resolve(labs) 
+      })
+      .catch(err => {
+        conn.close();
+        reject(err)
+      });
     });
   }
   

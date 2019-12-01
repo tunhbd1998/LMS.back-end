@@ -26,22 +26,14 @@ export const getLabModel = conn => {
         type: Sequelize.STRING,
         defaultValue: null
       },
-      // address: {
-      //   type: Sequelize.UUID,
-      //   allowNull: true,
-      //   references: {
-      //     model: getLabAddressModel(conn),
-      //     key: 'labId',
-      //   },
+      // labImage: {
+      //   type: Sequelize.STRING,
+      //   defaultValue: null
       // },
-      labImage: {
-        type: Sequelize.STRING,
-        defaultValue: null
-      },
-      labImageId: {
-        type: Sequelize.STRING,
-        defaultValue: null
-      },
+      // labImageId: {
+      //   type: Sequelize.STRING,
+      //   defaultValue: null
+      // },
       confirmFile: {
         type: Sequelize.STRING,
         defaultValue: null

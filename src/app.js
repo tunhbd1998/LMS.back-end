@@ -6,15 +6,9 @@ import logger from 'morgan';
 import dotenv from 'dotenv';
 import debugModule from 'debug';
 import cors from 'cors';
-import {
-  handleNotFound,
-  handleError,
-  userRouter,
-  labRouter,
-  homeRouter
-} from './routes';
-import { userService } from './services';
+import { handleNotFound, handleError, userRouter, homeRouter } from './routes';
 import { configPassport } from './passport';
+import { recruitmentRouter } from './routes/recruitments';
 
 const log = debugModule('LMS:app');
 dotenv.config({ path: path.join(__dirname, '/.env') });
@@ -40,30 +34,8 @@ configPassport(app);
 
 app.use('/', homeRouter);
 app.use('/users', userRouter);
-app.use('/labs', labRouter);
+app.use('/recruitments', recruitmentRouter);
 app.use(handleNotFound);
 app.use(handleError);
-
-// userService
-//   .createOne({
-//     username: 'tunh',
-//     password: 'tunh',
-//     fullname: 'Nguyen huu tu',
-//     phone: '0909090909',
-//     email: 'tunhbd1998@gmail.com',
-//     IDCardNumber: '333333333',
-//     university: 'university of science'
-//   })
-//   .then(user => {
-//     log('created user', user);
-//   })
-//   .catch(err => {
-//     log('create error', err);
-//   });
-
-// userService
-//   .findOne({ username: 'tunh' })
-//   .then(user => log('user', user))
-//   .catch(err => log('error', err));
 
 export default app;

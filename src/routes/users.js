@@ -143,10 +143,12 @@ router.post('/check-exists-username', async (req, res, next) => {
 });
 
 router.get('/profile', withAuth, (req, res, next) => {
+  console.log('user', req.user);
   userService
     .getProfile(req.user.username)
     .then(profile => res.status(200).json(new LMSResponse(null, { profile })))
     .catch(err => {
+      console.log(err);
       req.error = new LMSError(500, 'Server error');
       next();
     });
@@ -169,8 +171,7 @@ router.post('/profile', withAuth, (req, res, next) => {
   }
 });
 
-router.post('/upload-avatar', withAuth, uploadImageFile,
-  (req, res) => {
-    uploadImage(req, res);
+router.post('/upload-avatar', withAuth, uploadImageFile, (req, res) => {
+  uploadImage(req, res);
 });
 export const userRouter = router;

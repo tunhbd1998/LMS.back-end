@@ -4,13 +4,14 @@ import { LMSError } from '../defines/errors';
 
 export const withAuth = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user, info) => {
-    if (err) {
+    if (err || !user) {
       return res
         .status(200)
         .json(new LMSResponse(new LMSError(401, 'Unauthorization'), null));
     }
 
     req.user = user;
+    console.log('userser', user);
     next();
   })(req, res, next);
 };

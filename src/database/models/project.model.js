@@ -11,20 +11,28 @@ export const getProjectModel = conn => {
     {
       id: {
         type: Sequelize.UUID,
-        primaryKey: true,
+        primaryKey: true
       },
       name: {
         type: Sequelize.TEXT,
-        allowNull: false,
+        allowNull: false
       },
       description: {
         type: Sequelize.TEXT,
-        defaultValue: null,
+        defaultValue: null
       },
       status: {
         type: Sequelize.TINYINT,
-        defaultValue: 0,
+        defaultValue: 0
       },
+      image: {
+        type: Sequelize.STRING,
+        defaultValue: null
+      },
+      imageId: {
+        type: Sequelize.STRING,
+        defaultValue: null
+      }
       // labId: {
       //   type: Sequelize.UUID,
       //   allowNull: false,
@@ -54,24 +62,24 @@ export const getProjectModel = conn => {
   ProjectModel.belongsTo(UserModel, {
     foreignKey: 'projectAdmin',
     targetKey: 'username',
-    timestamps: false,
+    timestamps: false
   });
   ProjectModel.belongsTo(LabModel, {
     foreignKey: 'labId',
     targetKey: 'id',
-    timestamps: false,
+    timestamps: false
   });
   ProjectModel.belongsToMany(UserModel, {
     through: ProjectMemberModel,
     foreignKey: 'projectId',
     otherKey: 'userId',
-    timestamps: false,
+    timestamps: false
   });
   ProjectModel.belongsToMany(SchedulerModel, {
     through: ProjectSchedulerModel,
     foreignKey: 'projectId',
     otherKey: 'schedulerId',
-    timestamps: false,
+    timestamps: false
   });
 
   return ProjectModel;

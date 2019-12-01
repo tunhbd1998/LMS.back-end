@@ -13,6 +13,7 @@ import { getProjectMemberModel } from './database/models/project-member.model';
 import { getProjectSchedulerModel } from './database/models/project-scheduler.model';
 import { getSchedulerModel } from './database/models/scheduler.model';
 import { getToolModel } from './database/models/tool.model';
+import { getLabImageModel } from './database/models/lab-image.model';
 
 const conn = createConnection();
 
@@ -34,6 +35,7 @@ conn
     // getLabMemberModel(conn);
     // getLabSchedulerModel(conn);
     getLabModel(conn);
+    getLabImageModel(conn);
     // getProjectMemberModel(conn);
     // getProjectSchedulerModel(conn);
     getProjectModel(conn);

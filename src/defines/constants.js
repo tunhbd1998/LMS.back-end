@@ -39,7 +39,6 @@ export const REQUIRE_USER_GET_PROFILE_FIELDS = [
   'IDCardNumber',
   'IDNumber',
   'university',
-  'role',
   'job'
 ];
 
