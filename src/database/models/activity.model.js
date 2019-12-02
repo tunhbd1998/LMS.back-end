@@ -2,7 +2,6 @@ import Sequelize from 'sequelize';
 import { getLabModel } from './lab.model';
 import { getUserModel } from './user.model';
 import { getTakePartInActivityModel } from './take-part-in-activity.model';
-
 export const getActivityModel = conn => {
   const ActivityModel = conn.define(
     'activity',

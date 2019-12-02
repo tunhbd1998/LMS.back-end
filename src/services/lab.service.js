@@ -23,8 +23,6 @@ class LabService {
 
   
   getLabById(labId) {
-
-
     return new Promise((resolve,reject) =>{
       const conn = createConnection();
       const LabModel = getLabModel(conn);
@@ -51,7 +49,7 @@ class LabService {
 
       baseService.findMany(LabModel,{conditions: null,fields: ['name','university','specialize'],
                   limit,
-                  offsetl,
+                  offset,
                   order,
                 })
                   .then(labs => resolve(labs))
