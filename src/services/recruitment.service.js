@@ -15,7 +15,7 @@ class RecruitmentService {
 
       baseService
         .count(RecruitmentModel, {
-          conditions: {
+          where: {
             ...(labId ? { forLab: labId } : {}),
             forProject: projectId ? projectId : { [Op.not]: null },
             ...(status < 0 || status >= 2 ? {} : { isOpen: status })
@@ -47,7 +47,7 @@ class RecruitmentService {
 
       baseService
         .findMany(RecruitmentModel, {
-          conditions: {
+          where: {
             ...(labId ? { forLab: labId } : {}),
             forProject: projectId ? projectId : { [Op.not]: null },
             ...(status < 0 || status >= 2 ? {} : { isOpen: status })
@@ -65,13 +65,13 @@ class RecruitmentService {
               return {
                 ...rcm,
                 forLab: await baseService.findOne(LabModel, {
-                  conditions: {
+                  where: {
                     id: rcm.forLab
                   },
                   fields: ['id', 'name']
                 }),
                 forProject: await baseService.findOne(ProjectModel, {
-                  conditions: {
+                  where: {
                     id: rcm.forProject
                   },
                   fields: ['id', 'name', 'image']
@@ -96,7 +96,7 @@ class RecruitmentService {
 
       baseService
         .count(RecruitmentModel, {
-          conditions: {
+          where: {
             forProject: null,
             ...(labId ? { labId } : {}),
             ...(status >= 2 || status < 0 ? {} : { isOpen: status })
@@ -125,7 +125,7 @@ class RecruitmentService {
 
       baseService
         .findMany(RecruitmentModel, {
-          conditions: {
+          where: {
             forProject: null,
             ...(labId ? { labId } : {}),
             ...(status >= 2 || status < 0 ? {} : { isOpen: status })

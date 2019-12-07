@@ -9,32 +9,33 @@ import { REQUIRE_USER_GET_PROFILE_FIELDS } from '../defines/constants';
 import { getLabAddressModel } from '../database/models/lab-address.model';
 
 class UserService {
-  findOne({ conditions, fields }) {
-    return new Promise((resolve, reject) => {
-      const conn = createConnection();
-      const UserModel = getUserModel(conn);
+  findOne({ where, fields, include }) {
+    const conn = createConnection();
+    const UserModel = getUserModel(conn);
 
-      conn
-        .authenticate()
-        .then(() => {
-          baseService
-            .findOne(UserModel, { conditions, fields })
-            .then(user => {
-              conn.close();
-              resolve(user);
-            })
-            .catch(err => {
-              conn.close();
-              reject(err);
-            });
-        })
-        .catch(err => reject(err));
-    });
+    return baseService.findOne(UserModel, { where, fields, include });
+    // return new Promise((resolve, reject) => {
+    //   conn
+    //     .authenticate()
+    //     .then(() => {
+    //       baseService
+    //         .findOne(UserModel, { conditions, fields })
+    //         .then(user => {
+    //           conn.close();
+    //           resolve(user);
+    //         })
+    //         .catch(err => {
+    //           conn.close();
+    //           reject(err);
+    //         });
+    //     })
+    //     .catch(err => reject(err));
+    // });
   }
 
   isExists(username) {
     return new Promise((resolve, reject) => {
-      this.findOne({ conditions: { username }, fields: ['username'] })
+      this.findOne({ where: { username }, fields: ['username'] })
         .then(user => {
           resolve(user ? true : false);
         })
@@ -42,7 +43,7 @@ class UserService {
     });
   }
 
-  findMany({ conditions, fields, limit, offset, order }) {
+  findMany({ where, fields, limit, offset, order, include }) {
     return new Promise((resolve, reject) => {
       const conn = createConnection();
       const UserModel = getUserModel(conn);
@@ -51,7 +52,14 @@ class UserService {
         .authenticate()
         .then(() => {
           baseService
-            .findMany(UserModel, { conditions, fields, limit, offset, order })
+            .findMany(UserModel, {
+              where,
+              fields,
+              limit,
+              offset,
+              order,
+              include
+            })
             .then(users => {
               conn.close();
               resolve(users);
@@ -67,7 +75,7 @@ class UserService {
 
   async getProfile(username) {
     return this.findOne({
-      conditions: { username },
+      where: { username },
       fields: REQUIRE_USER_GET_PROFILE_FIELDS
     });
   }
