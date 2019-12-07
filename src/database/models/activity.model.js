@@ -39,14 +39,6 @@ export const getActivityModel = conn => {
         type: Sequelize.TEXT,
         defaultValue: null
       }
-      // LabId: {
-      //   type: Sequelize.UUID,
-      //   allowNull: false,
-      //   references: {
-      //     model: getLabModel(conn),
-      //     key: 'id',
-      //   },
-      // },
     },
     { tableName: 'activity', timestamps: false }
   );
@@ -56,12 +48,13 @@ export const getActivityModel = conn => {
   const TakePartInActivityModel = getTakePartInActivityModel(conn);
 
   ActivityModel.belongsTo(LabModel, {
+    as: 'lab',
     foreignKey: 'labId',
     targetKey: 'id',
-    // constraints: false,
     timestamps: false
   });
   ActivityModel.belongsToMany(UserModel, {
+    as: 'takePartInUsers',
     through: TakePartInActivityModel,
     foreignKey: 'activityId',
     otherKey: 'userId',

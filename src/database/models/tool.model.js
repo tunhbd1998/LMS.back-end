@@ -40,6 +40,7 @@ export const getToolModel = conn => {
   const LabModel = getLabModel(conn);
 
   ToolModel.belongsTo(LabModel, {
+    as: 'ofLab',
     foreignKey: 'labId',
     targetKey: 'id',
     timestamps: false

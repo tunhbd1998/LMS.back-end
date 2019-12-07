@@ -8,61 +8,46 @@ export const getBookingModel = conn => {
     {
       id: {
         type: Sequelize.UUID,
-        primaryKey: true,
+        primaryKey: true
       },
       beginTime: {
         type: Sequelize.DATE,
-        defaultValue: null,
+        defaultValue: null
       },
       endTime: {
         type: Sequelize.DATE,
-        defaultValue: null,
+        defaultValue: null
       },
       purpose: {
         type: Sequelize.TEXT,
-        defaultValue: null,
+        defaultValue: null
       },
       status: {
         type: Sequelize.TINYINT,
-        defaultValue: 1,
+        defaultValue: 1
       },
       type: {
         type: Sequelize.TINYINT,
-        defaultValue: 0,
-      },
-      // labId: {
-      //   type: Sequelize.UUID,
-      //   defaultValue: null,
-      //   references: {
-      //     model: getLabModel(conn),
-      //     key: 'id',
-      //   },
-      // },
-      // userId: {
-      //   type: Sequelize.STRING,
-      //   defaultValue: null,
-      //   references: {
-      //     model: getUserModel(conn),
-      //     key: 'username',
-      //   },
-      // },
+        defaultValue: 0
+      }
     },
     { tableName: 'booking', timestamps: false }
   );
 
   const LabModel = getLabModel(conn);
   const UserModel = getUserModel(conn);
+
   BookingModel.belongsTo(UserModel, {
+    as: 'user',
     foreignKey: 'userId',
     targetKey: 'username',
-    // constraints: false,
-    timestamps: false,
+    timestamps: false
   });
   BookingModel.belongsTo(LabModel, {
+    as: 'lab',
     foreignKey: 'labId',
     targetKey: 'id',
-    // constraints: false,
-    timestamps: false,
+    timestamps: false
   });
 
   return BookingModel;

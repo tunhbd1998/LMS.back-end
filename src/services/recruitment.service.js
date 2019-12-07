@@ -4,6 +4,8 @@ import { getRecruitmentModel } from '../database/models/recruitment.model';
 import { baseService } from './base.service';
 import { getLabModel } from '../database/models/lab.model';
 import { getProjectModel } from '../database/models/project.model';
+import { getLabAddressModel } from '../database/models/lab-address.model';
+import { getLabImageModel } from '../database/models/lab-image.model';
 
 class RecruitmentService {
   countProjectMemberRectruitments(labId = null, projectId = null, status) {
@@ -13,9 +15,11 @@ class RecruitmentService {
 
       baseService
         .count(RecruitmentModel, {
-          ...(labId ? { forLab: labId } : {}),
-          forProject: projectId ? projectId : { [Op.not]: null },
-          ...(status < 0 || status >= 2 ? {} : { isOpen: status })
+          conditions: {
+            ...(labId ? { forLab: labId } : {}),
+            forProject: projectId ? projectId : { [Op.not]: null },
+            ...(status < 0 || status >= 2 ? {} : { isOpen: status })
+          }
         })
         .then(count => {
           conn.close();
@@ -64,13 +68,13 @@ class RecruitmentService {
                   conditions: {
                     id: rcm.forLab
                   },
-                  fields: ['id', 'name', 'labImage']
+                  fields: ['id', 'name']
                 }),
                 forProject: await baseService.findOne(ProjectModel, {
                   conditions: {
                     id: rcm.forProject
                   },
-                  fields: ['id', 'name']
+                  fields: ['id', 'name', 'image']
                 })
               };
             })
@@ -92,9 +96,11 @@ class RecruitmentService {
 
       baseService
         .count(RecruitmentModel, {
-          forProject: null,
-          ...(labId ? { labId } : {}),
-          ...(status >= 2 || status < 0 ? {} : { isOpen: status })
+          conditions: {
+            forProject: null,
+            ...(labId ? { labId } : {}),
+            ...(status >= 2 || status < 0 ? {} : { isOpen: status })
+          }
         })
         .then(count => {
           resolve(count);
@@ -133,15 +139,43 @@ class RecruitmentService {
           const LabModel = getLabModel(conn);
           const recruits = await Promise.all(
             recruitments.map(async rcm => {
+              const query = `SELECT l.id, l.name, li.image
+                FROM lab l LEFT JOIN lab_image li ON l.id = li.labId
+                WHERE l.id='${rcm.forLab}'`;
               return {
                 ...rcm,
-                forLab: await baseService.findOne(LabModel, {
-                  conditions: {
+                forLab: await LabModel.findOne({
+                  where: {
                     id: rcm.forLab
                   },
-                  fields: ['id', 'name', 'labImage']
+                  attributes: ['id', 'name'],
+                  include: [
+                    {
+                      model: getLabImageModel(conn),
+                      attributes: ['image']
+                    }
+                  ]
+                }).then(res => {
+                  return res.dataValues;
                 })
+                // forLab: await conn
+                //   .query(query, {
+                //     model: LabModel,
+                //     mapToModel: true
+                //   })
+                //   .then(res => {
+                //     return res[0].dataValues;
+                //   })
               };
+              // return {
+              //   ...rcm,
+              //   forLab: await baseService.findOne(LabModel, {
+              //     conditions: {
+              //       id: rcm.forLab
+              //     },
+              //     fields: ['id', 'name', 'labImage']
+              //   })
+              // };
             })
           );
           conn.close();

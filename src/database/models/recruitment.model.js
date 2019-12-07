@@ -54,16 +54,19 @@ export const getRecruitmentModel = conn => {
   const UserModel = getUserModel(conn);
 
   RecruitmentModel.belongsTo(LabModel, {
-    foreignKey: 'forLab',
+    as: 'forLab',
+    foreignKey: 'forLabId',
     targetKey: 'id',
     timestamps: false
   });
   RecruitmentModel.belongsTo(ProjectModel, {
-    foreignKey: 'forProject',
+    as: 'forProject',
+    foreignKey: 'forProjectId',
     targetKey: 'id',
     timestamps: false
   });
   RecruitmentModel.belongsToMany(UserModel, {
+    as: 'appliedUsers',
     through: ApplyRecruitmentModel,
     foreignKey: 'recruitmentId',
     otherKey: 'userId',

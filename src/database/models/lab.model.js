@@ -4,7 +4,7 @@ import { getLabAddressModel } from './lab-address.model';
 import { getLabMemberModel } from './lab-member.model';
 import { getSchedulerModel } from './scheduler.model';
 import { getLabSchedulerModel } from './lab-scheduler.model';
-// import { getLabMemberModel } from './lab-member.model';
+import { getLabImageModel } from './lab-image.model';
 
 export const getLabModel = conn => {
   const LabModel = conn.define(
@@ -59,9 +59,11 @@ export const getLabModel = conn => {
   const LabMemberModel = getLabMemberModel(conn);
   const SchedulerModel = getSchedulerModel(conn);
   const LabSchedulerModel = getLabSchedulerModel(conn);
+  const LabImageModel = getLabImageModel(conn);
 
   LabModel.belongsTo(LabAddressModel, {
-    foreignKey: 'address',
+    as: 'address',
+    foreignKey: 'addressId',
     targetKey: 'labId',
     // constraints: false,
     timestamps: false
@@ -74,7 +76,8 @@ export const getLabModel = conn => {
     timestamps: false
   });
   LabModel.belongsTo(UserModel, {
-    foreignKey: 'admin',
+    as: 'admin',
+    foreignKey: 'adminId',
     targetKey: 'username',
     timestamps: false
   });
@@ -82,6 +85,12 @@ export const getLabModel = conn => {
     through: LabSchedulerModel,
     foreignKey: 'labId',
     otherKey: 'schedulerId',
+    timestamps: false
+  });
+  LabModel.hasMany(LabImageModel, {
+    foreignKey: 'labId',
+    sourceKey: 'id',
+    as: 'images',
     timestamps: false
   });
 

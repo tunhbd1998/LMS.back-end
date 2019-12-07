@@ -3,3 +3,4 @@ export { handleNotFound } from './not-found';
 export { handleError } from './error';
 export { userRouter } from './users';
 export { labRouter } from './labs';
+export { recruitmentRouter } from './recruitments';

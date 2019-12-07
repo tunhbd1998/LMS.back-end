@@ -1,7 +1,3 @@
-// import Sequelize, { SequelizeScopeError } from 'sequelize';
-// import { getProjectModel } from './project.model';
-// import { getUserModel } from './user.model';
-
 export const getProjectMemberModel = conn => {
   return conn.define(
     'project_member',
@@ -25,7 +21,7 @@ export const getProjectMemberModel = conn => {
     },
     {
       tableName: 'project_member',
-      timestamps: false,
+      timestamps: false
     }
   );
 };

@@ -1,31 +1,84 @@
-import { isEmpty } from 'lodash';
+import { isEmpty, omit, keysIn } from 'lodash';
+import { Model } from 'sequelize';
 import { LMSError } from '../defines/errors';
 
 class BaseService {
-  formatQueryOptions({ conditions, fields, limit, offset, order }) {
+  formatWhere(where) {
+    if (isEmpty(where)) {
+      return {};
+    }
+
+    return omit(
+      where,
+      keysIn(where).filter(field => isEmpty(where[field]))
+    );
+  }
+
+  formatQueryOptions({
+    where,
+    fields,
+    limit,
+    offset,
+    order,
+    include,
+    transaction
+  }) {
     return {
-      where: conditions || {},
-      attributes: isEmpty(fields) === 0 ? undefined : fields,
+      where: this.formatWhere(where),
+      attributes: isEmpty(fields) ? undefined : fields,
       limit: limit || undefined,
       offset: offset || undefined,
-      order: order || undefined
+      order: order || undefined,
+      include: isEmpty(include)
+        ? undefined
+        : include.map(icl => ({
+            ...icl,
+            where: this.formatWhere(icl.where)
+          })),
+      transaction: transaction || undefined
     };
   }
 
-  findOne(model, { conditions, fields }) {
+  formatCountQueryOptions({
+    where,
+    groupByAttributes,
+    countOnCol,
+    include,
+    transaction
+  }) {
+    return {
+      where: this.formatWhere(where),
+      attributes: isEmpty(groupByAttributes) ? undefined : groupByAttributes,
+      col: countOnCol || undefined,
+      include: isEmpty(include)
+        ? undefined
+        : include.map(icl => ({
+            ...icl,
+            where: this.formatWhere(icl.where)
+          })),
+      transaction: transaction || undefined
+    };
+  }
+
+  findOne(model, { where, fields, include, transaction }) {
     return new Promise((resolve, reject) => {
       if (!model) {
         reject(new LMSError(500, `model is ${model}`));
       }
 
       model
-        .findOne(this.formatQueryOptions({ conditions, fields }))
+        .findOne(
+          this.formatQueryOptions({ where, fields, include, transaction })
+        )
         .then(res => resolve(res ? res.dataValues : null))
         .catch(err => reject(err));
     });
   }
 
-  findMany(model, { conditions, fields, limit, offset, order }) {
+  findMany(
+    model,
+    { where, fields, limit, offset, order, include, transaction }
+  ) {
     return new Promise((resolve, reject) => {
       if (!model) {
         reject(new LMSError(500, `model is ${model}`));
@@ -33,7 +86,15 @@ class BaseService {
 
       model
         .findAll(
-          this.formatQueryOptions({ conditions, fields, limit, offset, order })
+          this.formatQueryOptions({
+            where,
+            fields,
+            limit,
+            offset,
+            order,
+            include,
+            transaction
+          })
         )
         .then(resArr =>
           resolve(!isEmpty(resArr) ? resArr.map(res => res.dataValues) : [])
@@ -42,14 +103,21 @@ class BaseService {
     });
   }
 
-  count(model, conditions) {
+  count(model, { where, groupByAttributes, countOnCol, include }) {
     return new Promise((resolve, reject) => {
       if (!model) {
         reject(new LMSError(500, `model is ${model}`));
       }
 
       model
-        .count(this.formatQueryOptions({ conditions }))
+        .count(
+          this.formatCountQueryOptions({
+            where,
+            groupByAttributes,
+            countOnCol,
+            include
+          })
+        )
         .then(res => resolve(res))
         .catch(err => reject(err));
     });

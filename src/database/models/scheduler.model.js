@@ -7,28 +7,28 @@ export const getSchedulerModel = conn => {
     {
       id: {
         type: Sequelize.UUID,
-        primaryKey: true,
+        primaryKey: true
       },
       date: {
         type: Sequelize.DATE,
-        defaultValue: null,
+        defaultValue: null
       },
       beginTime: {
         type: Sequelize.DATE,
-        defaultValue: null,
+        defaultValue: null
       },
       endTime: {
         type: Sequelize.DATE,
-        defaultValue: null,
+        defaultValue: null
       },
       work: {
         type: Sequelize.TEXT,
-        defaultValue: null,
+        defaultValue: null
       },
       type: {
         type: Sequelize.TINYINT,
-        defaultValue: 0,
-      },
+        defaultValue: 0
+      }
       // userId: {
       //   type: Sequelize.STRING,
       //   allowNull: false,
@@ -39,9 +39,10 @@ export const getSchedulerModel = conn => {
 
   const UserModel = getUserModel(conn);
   SchedulerModel.belongsTo(UserModel, {
+    as: 'ofUser',
     foreignKey: 'userId',
     targetKey: 'username',
-    timestamps: false,
+    timestamps: false
   });
 
   return SchedulerModel;

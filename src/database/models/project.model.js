@@ -60,11 +60,13 @@ export const getProjectModel = conn => {
   const ProjectSchedulerModel = getProjectSchedulerModel(conn);
 
   ProjectModel.belongsTo(UserModel, {
-    foreignKey: 'projectAdmin',
+    as: 'projectAdmin',
+    foreignKey: 'projectAdminId',
     targetKey: 'username',
     timestamps: false
   });
   ProjectModel.belongsTo(LabModel, {
+    as: 'lab',
     foreignKey: 'labId',
     targetKey: 'id',
     timestamps: false
