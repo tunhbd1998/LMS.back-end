@@ -4,7 +4,7 @@ import { getRecruitmentModel } from '../database/models/recruitment.model';
 import { baseService } from './base.service';
 import { getLabModel } from '../database/models/lab.model';
 import { getLabAddressModel } from '../database/models/lab-address.model';
-
+import { getLabMemberModel} from '../database/models/lab-member.model';
 class LabService {
   getLabById(id) {
     const conn = createConnection();
@@ -17,6 +17,33 @@ class LabService {
       ]
     });
   }
+  addLabMember(data) {
+    return new Promise((resolve, reject) => {
+      const conn = createConnection();
+      const labMemberModel = getLabMemberModel(conn);
+
+      conn
+        .authenticate()
+        .then(async () => {
+          labMemberModel
+            .create(
+              { ...data },
+              {}
+            )
+            .then(labMember => {
+              conn.close();
+              resolve(labMember.dataValues);
+            })
+            .catch(err => {
+              conn.close();
+              reject(err);
+            });
+        })
+        .catch(err => reject(err));
+    });
+  }
+
+
 
   // findLabs({ name, university, specialize, province, limit, offset, order }) {
   //   return new Promise((resolve, reject) => {
@@ -94,6 +121,30 @@ class LabService {
       transaction
     });
   }
+  getLabMemberList({ where, fields, limit, offser, order, include, transaction }) {
+    const conn = createConnection();
+    const LabMemberModel = getLabMemberModel(conn);
+
+    return baseService.findMany(LabMemberModel, {
+      where,
+      fields,
+      limit,
+      offser,
+      order,
+      include: isEmpty(include)
+        ? undefined
+        : include.map(icl => ({
+            ...icl,
+            model: icl.model(conn)
+          })),
+      transaction
+    });
+  }
+
+
+
+
+
 
   countLabsBy({ name, university, specialize, province }) {
     return new Promise((resolve, reject) => {

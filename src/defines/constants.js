@@ -41,6 +41,14 @@ export const REQUIRE_USER_GET_PROFILE_FIELDS = [
   'university',
   'job'
 ];
+export const REQUIRE_LAB_MEMBER_SIGN_UP_FIELDS = [
+  'labId',
+  'userId',
+  'position',
+  // 'confirmFile'
+];
+
+
 
 export const REQUIRE_USER_UPDATE_PROFILE_FIELDS = [
   ...REQUIRE_USER_GET_PROFILE_FIELDS,

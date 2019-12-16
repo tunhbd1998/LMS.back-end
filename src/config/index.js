@@ -26,6 +26,7 @@ module.exports = {
     PAGE_SIZE: {
       RECRUITMENT: 10,
       LAB: 10,
+      LAB_MEMBER: 10,
       PROJECT: 10,
       ACTIVITY: 10
     }
