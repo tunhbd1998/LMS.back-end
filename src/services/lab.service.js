@@ -130,6 +130,53 @@ class LabService extends BaseService {
         )
     );
   }
+  
+  addLabMember(data) {
+    return new Promise((resolve, reject) => {
+      const conn = createConnection();
+      const labMemberModel = getLabMemberModel(conn);
+
+      conn
+        .authenticate()
+        .then(async () => {
+          labMemberModel
+            .create(
+              { ...data },
+              {}
+            )
+            .then(labMember => {
+              conn.close();
+              resolve(labMember.dataValues);
+            })
+            .catch(err => {
+              conn.close();
+              reject(err);
+            });
+        })
+        .catch(err => reject(err));
+    });
+  }
+getLabMemberList({ where, fields, limit, offser, order, include, transaction }) {
+    const conn = createConnection();
+    const LabMemberModel = getLabMemberModel(conn);
+
+    return baseService.findMany(LabMemberModel, {
+      where,
+      fields,
+      limit,
+      offser,
+      order,
+      include: isEmpty(include)
+        ? undefined
+        : include.map(icl => ({
+            ...icl,
+            model: icl.model(conn)
+          })),
+      transaction
+    });
+  }
 }
 
 export const labService = new LabService();
+
+

@@ -1,4 +1,3 @@
-import Sequelize from 'sequelize';
 import { connection } from '../connection';
 
 const LabMemberModel = connection.define(
