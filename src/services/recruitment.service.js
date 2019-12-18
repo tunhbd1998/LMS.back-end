@@ -1,190 +1,94 @@
 import { Op } from 'sequelize';
-import { createConnection } from '../database';
-import { getRecruitmentModel } from '../database/models/recruitment.model';
-import { baseService } from './base.service';
-import { getLabModel } from '../database/models/lab.model';
-import { getProjectModel } from '../database/models/project.model';
-import { getLabAddressModel } from '../database/models/lab-address.model';
-import { getLabImageModel } from '../database/models/lab-image.model';
+import { RecruitmentModel } from '../database/models/recruitment.model';
+import { BaseService } from './base.service';
+import { LabModel } from '../database/models/lab.model';
+import { ProjectModel } from '../database/models/project.model';
 
-class RecruitmentService {
-  countProjectMemberRectruitments(labId = null, projectId = null, status) {
-    return new Promise((resolve, reject) => {
-      const conn = createConnection();
-      const RecruitmentModel = getRecruitmentModel(conn);
+class RecruitmentService extends BaseService {
+  constructor() {
+    super(RecruitmentModel);
+  }
 
-      baseService
-        .count(RecruitmentModel, {
-          where: {
-            ...(labId ? { forLab: labId } : {}),
-            forProject: projectId ? projectId : { [Op.not]: null },
-            ...(status < 0 || status >= 2 ? {} : { isOpen: status })
-          }
-        })
-        .then(count => {
-          conn.close();
-          console.log('count', count);
-          resolve(count);
-        })
-        .catch(err => {
-          conn.close();
-          reject(err);
-        });
+  async countProjectMemberRectruitments(labId, projectId, status) {
+    return this.count({
+      where: {
+        ...(labId ? { forLab: labId } : {}),
+        forProject: projectId ? projectId : { [Op.not]: null },
+        ...(status < 0 || status >= 2 ? {} : { isOpen: status })
+      }
     });
   }
 
-  findProjectMemberRecruitments(
-    labId = null,
-    projectId = null,
+  async findProjectMemberRecruitments(
+    labId,
+    projectId,
     status = 2,
-    limit = null,
-    offset = null,
-    order = null
+    limit,
+    offset,
+    order
   ) {
-    return new Promise((resolve, reject) => {
-      const conn = createConnection();
-      const RecruitmentModel = getRecruitmentModel(conn);
-
-      baseService
-        .findMany(RecruitmentModel, {
-          where: {
-            ...(labId ? { forLab: labId } : {}),
-            forProject: projectId ? projectId : { [Op.not]: null },
-            ...(status < 0 || status >= 2 ? {} : { isOpen: status })
-          },
-          fields: ['id', 'position', 'forLab', 'forProject'],
-          limit,
-          offset,
-          order
-        })
-        .then(async recruitments => {
-          const LabModel = getLabModel(conn);
-          const ProjectModel = getProjectModel(conn);
-          const recruits = await Promise.all(
-            recruitments.map(async rcm => {
-              return {
-                ...rcm,
-                forLab: await baseService.findOne(LabModel, {
-                  where: {
-                    id: rcm.forLab
-                  },
-                  fields: ['id', 'name']
-                }),
-                forProject: await baseService.findOne(ProjectModel, {
-                  where: {
-                    id: rcm.forProject
-                  },
-                  fields: ['id', 'name', 'image']
-                })
-              };
-            })
-          );
-          conn.close();
-          resolve(recruits);
-        })
-        .catch(err => {
-          conn.close();
-          reject(err);
-        });
+    return this.findMany({
+      where: {
+        ...(labId ? { forLab: labId } : {}),
+        forProject: projectId ? projectId : { [Op.not]: null },
+        ...(status < 0 || status >= 2 ? {} : { isOpen: status })
+      },
+      include: [
+        {
+          model: LabModel,
+          as: 'forLab',
+          attributes: ['id', 'name'],
+          required: false
+        },
+        {
+          model: ProjectModel,
+          as: 'forProject',
+          required: false,
+          attributes: ['id', 'name']
+        }
+      ],
+      fields: ['id', 'position', 'forLab', 'forProject'],
+      limit,
+      offset,
+      order
     });
   }
 
-  countLabMemberRecruitments(labId = null, status = 0) {
-    return new Promise((resolve, reject) => {
-      const conn = createConnection();
-      const RecruitmentModel = getRecruitmentModel(conn);
-
-      baseService
-        .count(RecruitmentModel, {
-          where: {
-            forProject: null,
-            ...(labId ? { labId } : {}),
-            ...(status >= 2 || status < 0 ? {} : { isOpen: status })
-          }
-        })
-        .then(count => {
-          resolve(count);
-        })
-        .catch(err => {
-          conn.close();
-          reject(err);
-        });
+  async countLabMemberRecruitments(labId = null, status = 0) {
+    return this.count({
+      where: {
+        forProject: null,
+        ...(labId ? { labId } : {}),
+        ...(status >= 2 || status < 0 ? {} : { isOpen: status })
+      }
     });
   }
 
-  findLabMemberRecruitments(
+  async findLabMemberRecruitments(
     labId = null,
     status = 2,
     limit = null,
     offset = null,
     order = null
   ) {
-    return new Promise((resolve, reject) => {
-      const conn = createConnection();
-      const RecruitmentModel = getRecruitmentModel(conn);
-
-      baseService
-        .findMany(RecruitmentModel, {
-          where: {
-            forProject: null,
-            ...(labId ? { labId } : {}),
-            ...(status >= 2 || status < 0 ? {} : { isOpen: status })
-          },
-          fields: ['id', 'forLab', 'position'],
-          limit,
-          offset,
-          order
-        })
-        .then(async recruitments => {
-          const LabModel = getLabModel(conn);
-          const recruits = await Promise.all(
-            recruitments.map(async rcm => {
-              const query = `SELECT l.id, l.name, li.image
-                FROM lab l LEFT JOIN lab_image li ON l.id = li.labId
-                WHERE l.id='${rcm.forLab}'`;
-              return {
-                ...rcm,
-                forLab: await LabModel.findOne({
-                  where: {
-                    id: rcm.forLab
-                  },
-                  attributes: ['id', 'name'],
-                  include: [
-                    {
-                      model: getLabImageModel(conn),
-                      attributes: ['image']
-                    }
-                  ]
-                }).then(res => {
-                  return res.dataValues;
-                })
-                // forLab: await conn
-                //   .query(query, {
-                //     model: LabModel,
-                //     mapToModel: true
-                //   })
-                //   .then(res => {
-                //     return res[0].dataValues;
-                //   })
-              };
-              // return {
-              //   ...rcm,
-              //   forLab: await baseService.findOne(LabModel, {
-              //     conditions: {
-              //       id: rcm.forLab
-              //     },
-              //     fields: ['id', 'name', 'labImage']
-              //   })
-              // };
-            })
-          );
-          conn.close();
-          resolve(recruits);
-        })
-        .catch(err => {
-          conn.close();
-          reject(err);
-        });
+    return this.findMany({
+      where: {
+        forProject: null,
+        ...(labId ? { labId } : {}),
+        ...(status >= 2 || status < 0 ? {} : { isOpen: status })
+      },
+      attributes: ['id', 'forLab', 'position'],
+      include: [
+        {
+          model: LabModel,
+          as: 'forLab',
+          attributes: ['id', 'name'],
+          required: false
+        }
+      ],
+      limit,
+      offset,
+      order
     });
   }
 }

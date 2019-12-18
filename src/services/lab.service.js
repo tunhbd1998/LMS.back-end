@@ -1,156 +1,134 @@
-import { isEmpty } from 'lodash';
-import { createConnection } from '../database';
-import { getRecruitmentModel } from '../database/models/recruitment.model';
-import { baseService } from './base.service';
-import { getLabModel } from '../database/models/lab.model';
-import { getLabAddressModel } from '../database/models/lab-address.model';
+import { FETCH_DATA, USER_ROLE_ID } from '../config';
+import { connection } from '../database';
+import { BaseService } from './base.service';
+import { userService } from './user.service';
+import { labAddressService } from './lab-address.service';
+import { generateId } from '../utils/fields';
+import { LabAddressModel } from '../database/models/lab-address.model';
+import { LabModel } from '../database/models/lab.model';
 
-class LabService {
-  getLabById(id) {
-    const conn = createConnection();
-    const LabModel = getLabModel(conn);
+class LabService extends BaseService {
+  constructor() {
+    super(LabModel);
+  }
 
-    return baseService.findOne(LabModel, {
+  async getLabDetail(id) {
+    const lab = await this.findOne({
       where: { id },
       include: [
-        { model: getLabAddressModel(conn), as: 'address', required: false }
+        {
+          model: LabAddressModel,
+          as: 'address',
+          required: false,
+          attributes: ['province', 'ward', 'detail']
+        }
       ]
     });
+
+    return lab;
   }
 
-  // findLabs({ name, university, specialize, province, limit, offset, order }) {
-  //   return new Promise((resolve, reject) => {
-  //     const conn = createConnection();
-  //     const LabModel = getLabModel(conn);
-  //     const query = `SELECT l.id, l.name, l.university, l.specialize, la.province, la.detail
-  //       FROM lab l JOIN lab_address la ON l.id = la.labId
-  //       WHERE
-  //         l.id IS NOT NULL
-  //         ${!isEmpty(name) ? `AND MATCH(l.name) AGAINST('${name}')` : ''}
-  //         ${
-  //           !isEmpty(university) && university !== 'all'
-  //             ? `AND l.university='${university}'`
-  //             : ''
-  //         }
-  //         ${
-  //           !isEmpty(specialize) && specialize !== 'all'
-  //             ? `AND l.specialize='${specialize}'`
-  //             : ''
-  //         }
-  //         ${
-  //           !isEmpty(province) && province !== 'all'
-  //             ? `AND la.province='${province}'`
-  //             : ''
-  //         }
-  //       ${!isEmpty(limit) ? `LIMIT ${limit}` : ''}
-  //       ${!isEmpty(offset) ? `OFFSET ${offset}` : ''}`;
+  async filterLabs(name, university, specialize, province, page, pageSize) {
+    const limit = pageSize || FETCH_DATA.PAGE_SIZE.LAB;
+    const offset = (page - 1) * limit;
+    const totalCount = await this.count({
+      where: { name, university, specialize },
+      include: [
+        {
+          model: LabAddressModel,
+          as: 'address',
+          required: false,
+          where: { province }
+        }
+      ]
+    });
 
-  //     conn
-  //       .query(query, {
-  //         model: LabModel,
-  //         mapToModel: true
-  //       })
-  //       .then(res => {
-  //         conn.close();
-  //         resolve(
-  //           res.map(lab => {
-  //             const data = lab.dataValues;
+    const totalPage = Math.ceil((totalCount * 1.0) / limit);
 
-  //             return {
-  //               ...data,
-  //               address: {
-  //                 province: data.province,
-  //                 detail: data.detail
-  //               },
-  //               province: undefined,
-  //               detail: undefined
-  //             };
-  //           })
-  //         );
-  //       })
-  //       .catch(err => {
-  //         conn.close();
-  //         reject(err);
-  //       });
-  //   });
-  // }
+    if (page > totalPage) {
+      return { page, totalPage, labs: [] };
+    }
 
-  findMany({ where, fields, limit, offser, order, include, transaction }) {
-    const conn = createConnection();
-    const LabModel = getLabModel(conn);
-
-    return baseService.findMany(LabModel, {
-      where,
-      fields,
+    const labs = await this.findMany({
+      where: { name, university, specialize },
+      attributes: ['id', 'name', 'university', 'specialize'],
       limit,
-      offser,
-      order,
-      include: isEmpty(include)
-        ? undefined
-        : include.map(icl => ({
-            ...icl,
-            model: icl.model(conn)
-          })),
-      transaction
+      offset,
+      include: [
+        {
+          model: LabAddressModel,
+          as: 'address',
+          required: false,
+          where: { province },
+          attributes: ['province', 'ward', 'detail']
+        }
+      ]
     });
+
+    return { page, totalPage, labs };
   }
 
-  countLabsBy({ name, university, specialize, province }) {
-    return new Promise((resolve, reject) => {
-      const conn = createConnection();
-      const LabModel = getLabModel(conn);
-      const query = `SELECT l.id
-        FROM lab l JOIN lab_address la ON l.id = la.labId
-        WHERE 
-          l.id IS NOT NULL
-          ${!isEmpty(name) ? `AND MATCH(l.name) AGAINST('${name}')` : ''}
-          ${
-            !isEmpty(university) && university !== 'all'
-              ? `AND l.university='${university}'`
-              : ''
-          }
-          ${
-            !isEmpty(specialize) && specialize !== 'all'
-              ? `AND l.specialize='${specialize}'`
-              : ''
-          }
-          ${
-            !isEmpty(province) && province !== 'all'
-              ? `AND la.province='${province}'`
-              : ''
-          }`;
-
-      conn
-        .query(query, {
-          model: LabModel,
-          mapToModel: true
-        })
-        .then(res => {
-          conn.close();
-          resolve(res.length);
-        })
-        .catch(err => {
-          conn.close();
-          reject(err);
-        });
+  async getHighlightLabs(page, pageSize) {
+    const limit = pageSize || FETCH_DATA.PAGE_SIZE.LAB;
+    const offset = (page - 1) * limit;
+    const totalCount = await this.count({
+      where: {}
     });
+
+    const totalPage = Math.ceil((totalCount * 1.0) / limit);
+
+    if (page > totalPage) {
+      return { page, totalPage, labs: [] };
+    }
+
+    const labs = await this.findMany({
+      where: {},
+      attributes: ['id', 'name', 'university', 'specialize'],
+      limit,
+      offset,
+      include: [
+        {
+          model: LabAddressModel,
+          as: 'address',
+          required: false,
+          where: {},
+          attributes: ['province', 'ward', 'detail']
+        }
+      ]
+    });
+
+    return { page, totalPage, labs };
   }
 
-  count({ where, groupByAttributes, countOnCol, include } = {}) {
-    const conn = createConnection();
-    const LabModel = getLabModel(conn);
-
-    return baseService.count(LabModel, {
-      where,
-      groupByAttributes,
-      countOnCol,
-      include: isEmpty(include)
-        ? undefined
-        : include.map(icl => ({
-            ...icl,
-            model: icl.model(conn)
-          }))
-    });
+  async signUpNewLab(adminData, labData) {
+    return connection.transaction(t =>
+      userService
+        .createOne(
+          { ...adminData, role: USER_ROLE_ID.LAB_ADMIN },
+          { transaction: t }
+        )
+        .then(admin =>
+          labAddressService
+            .createOne(
+              {
+                ...labData.address,
+                labId: generateId()
+              },
+              { transaction: t }
+            )
+            .then(address =>
+              this.createOne(
+                {
+                  ...labData,
+                  id: address.labId,
+                  adminId: admin.username,
+                  addressId: address.labId
+                },
+                { transaction: t }
+              ).then(lab => ({ ...lab, admin, address }))
+            )
+        )
+    );
   }
 }
 

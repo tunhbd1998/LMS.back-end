@@ -3,19 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-Object.defineProperty(exports, "getUserModel", {
+Object.defineProperty(exports, "connection", {
   enumerable: true,
   get: function () {
-    return _user.getUserModel;
+    return _connection.connection;
   }
 });
-Object.defineProperty(exports, "createConnection", {
-  enumerable: true,
-  get: function () {
-    return _connection.createConnection;
-  }
-});
-
-var _user = require("./models/user.model");
 
 var _connection = require("./connection");

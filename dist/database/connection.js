@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createConnection = void 0;
+exports.connection = exports.createConnection = void 0;
 
 var _sequelize = _interopRequireDefault(require("sequelize"));
 
@@ -23,3 +23,5 @@ const createConnection = () => {
 };
 
 exports.createConnection = createConnection;
+const connection = createConnection();
+exports.connection = connection;

@@ -1,27 +1,12 @@
-export const getProjectMemberModel = conn => {
-  return conn.define(
-    'project_member',
-    {
-      // projectId: {
-      //   type: Sequelize.UUID,
-      //   primaryKey: true,
-      //   references: {
-      //     model: getProjectModel(conn),
-      //     key: 'id',
-      //   },
-      // },
-      // userId: {
-      //   type: Sequelize.STRING,
-      //   primaryKey: true,
-      //   references: {
-      //     model: getUserModel(conn),
-      //     key: 'username',
-      //   },
-      // },
-    },
-    {
-      tableName: 'project_member',
-      timestamps: false
-    }
-  );
-};
+import { connection } from '../connection';
+
+const ProjectMemberModel = connection.define(
+  'project_member',
+  {},
+  {
+    tableName: 'project_member',
+    timestamps: false
+  }
+);
+
+export { ProjectMemberModel };

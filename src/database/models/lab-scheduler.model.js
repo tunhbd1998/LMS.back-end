@@ -1,9 +1,9 @@
-import Sequelize from 'sequelize';
+import { connection } from '../connection';
 
-export const getLabSchedulerModel = conn => {
-  return conn.define(
-    'lab_scheduler',
-    {},
-    { tableName: 'lab_scheduler', timestamps: false }
-  );
-};
+const LabSchedulerModel = connection.define(
+  'lab_scheduler',
+  {},
+  { tableName: 'lab_scheduler', timestamps: false }
+);
+
+export { LabSchedulerModel };
