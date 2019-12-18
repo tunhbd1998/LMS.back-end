@@ -1,3 +1,5 @@
+import { omit, get } from 'lodash';
+import { Op } from 'sequelize';
 import { FETCH_DATA, USER_ROLE_ID } from '../config';
 import { connection } from '../database';
 import { BaseService } from './base.service';
@@ -6,6 +8,8 @@ import { labAddressService } from './lab-address.service';
 import { generateId } from '../utils/fields';
 import { LabAddressModel } from '../database/models/lab-address.model';
 import { LabModel } from '../database/models/lab.model';
+import { LabMemberModel } from '../database/models/lab-member.model';
+import { labMemberService } from './lab-member.service';
 
 class LabService extends BaseService {
   constructor() {
@@ -130,53 +134,55 @@ class LabService extends BaseService {
         )
     );
   }
-  
-  addLabMember(data) {
-    return new Promise((resolve, reject) => {
-      const conn = createConnection();
-      const labMemberModel = getLabMemberModel(conn);
 
-      conn
-        .authenticate()
-        .then(async () => {
-          labMemberModel
-            .create(
-              { ...data },
-              {}
-            )
-            .then(labMember => {
-              conn.close();
-              resolve(labMember.dataValues);
-            })
-            .catch(err => {
-              conn.close();
-              reject(err);
-            });
-        })
-        .catch(err => reject(err));
-    });
+  async addLabMember(labId, data) {
+    return connection.transaction(t =>
+      userService.createOne(omit(data, ['position'])).then(user =>
+        LabMemberModel.create({
+          labId,
+          userId: user.username,
+          position: get(data, 'position', null)
+        }).then(() => user)
+      )
+    );
   }
-getLabMemberList({ where, fields, limit, offser, order, include, transaction }) {
-    const conn = createConnection();
-    const LabMemberModel = getLabMemberModel(conn);
 
-    return baseService.findMany(LabMemberModel, {
-      where,
-      fields,
-      limit,
-      offser,
-      order,
-      include: isEmpty(include)
-        ? undefined
-        : include.map(icl => ({
-            ...icl,
-            model: icl.model(conn)
-          })),
-      transaction
-    });
+  async getLabMemberList(labId, page, pageSize) {
+    return {
+      page,
+      totalPage: 0,
+      labMembers: []
+    };
+    // const limit = pageSize;
+    // const offset = (page - 1) * limit;
+    // const totalCount = await labMemberService.count({
+    //   where: {
+    //     labId
+    //   }
+    // });
+    // const totalPage = Math.ceil((totalCount * 1.0) / pageSize);
+
+    // if (page > totalPage) {
+    //   return {
+    //     page,
+    //     totalPage,
+    //     labMembers: []
+    //   };
+    // }
+
+    // let labMembers = await labMemberService.findMany({
+    //   where: { labId },
+    //   attributes: ['userId', 'position']
+    // });
+    // labMembers = await userService.findMany({
+    //   where: {
+    //     username: {
+    //       [Op.in]: labMembers
+    //     }
+    //   },
+    //   attributes: ['fullname']
+    // });
   }
 }
 
 export const labService = new LabService();
-
-

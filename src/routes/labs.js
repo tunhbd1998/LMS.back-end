@@ -1,13 +1,16 @@
 import express from 'express';
 import { isNumber, get } from 'lodash';
-import { FETCH_DATA } from '../config';
+import { FETCH_DATA, USER_ROLE_ID } from '../config';
 import { LMSResponse } from '../defines/response';
-import { withAuth } from '../middlewares/with-auth-middleware';
+import { REQUIRE_LAB_MEMBER_SIGN_UP_FIELDS } from '../defines/constants';
 import { LMSError, InternalError } from '../defines/errors';
 import { convertToInt } from '../utils/lang';
-import { LabModel } from '../database/models/lab.model';
-import { LabAddressModel } from '../database/models/lab-address.model';
 import { labService } from '../services/lab.service';
+import { validateDTO } from '../middlewares/validate-dto.middleware';
+import { withAuth } from '../middlewares/with-auth-middleware';
+import { withRole } from '../middlewares/with-role.middleware';
+import { getLabInfo } from '../middlewares/get-lab-info.middleware';
+import { labMemberService } from '../services/lab-member.service';
 
 const router = express.Router();
 
@@ -31,7 +34,7 @@ router.get('/filter/many', (req, res, next) => {
 router.get('/highlights', async (req, res, next) => {
   const page = convertToInt(req.query.page, 1);
   const pageSize = convertToInt(req.query.pageSize, FETCH_DATA.PAGE_SIZE.LAB);
-  
+
   labService
     .getHighlightLabs(page, pageSize)
     .then(({ page, totalPage, labs }) => {
@@ -42,7 +45,7 @@ router.get('/highlights', async (req, res, next) => {
       next();
     });
 });
-  
+
 router.get('/:id', (req, res, next) => {
   const labId = get(req, ['params', 'id']);
 
@@ -55,53 +58,55 @@ router.get('/:id', (req, res, next) => {
     });
 });
 
-router.post('/add-lab-member', async (req, res, next) => {
-  const data = req.query;
-  console.log(data);
-  if (!isEnoughFields(data, REQUIRE_LAB_MEMBER_SIGN_UP_FIELDS, true)) {
-    req.error = new LMSError(400, 'Bad request');
-    return next();
+router.post(
+  '/add-lab-member',
+  withAuth,
+  withRole(USER_ROLE_ID.LAB_ADMIN),
+  validateDTO(REQUIRE_LAB_MEMBER_SIGN_UP_FIELDS, true),
+  getLabInfo,
+  (req, res, next) => {
+    labService
+      .addLabMember(get(req, ['lab', 'id']), get(req, 'body'))
+      .then(labMember => {
+        if (labMember) {
+          return res
+            .status(200)
+            .json(new LMSResponse(null, { status: true, labMember }));
+        }
+
+        res
+          .status(200)
+          .json(new LMSResponse(null, { status: false, labMember: null }));
+      })
+      .catch(err => {
+        req.error = new LMSError(500, err);
+        next();
+      });
   }
+);
 
+router.get(
+  '/lab-member-list',
+  withAuth,
+  withRole(USER_ROLE_ID.LAB_ADMIN),
+  getLabInfo,
+  async (req, res, next) => {
+    const page = get(req, ['query', 'page'], 1);
+    const pageSize = get(
+      req,
+      ['query', 'pageSize'],
+      FETCH_DATA.PAGE_SIZE.LAB_MEMBER
+    );
 
-  labService
-    .addLabMember(data)
-    .then(labMember => {
-      console.log(labMember);
-      if (labMember) {
-        return res.status(200).json(new LMSResponse(null, { status: true }));
-      }
-
-      res.status(200).json(new LMSResponse(null, { status: false }));
-    })
-    .catch(err => {
-      req.error = new LMSError(500, err);
-      next();
-    });
-});
-
-router.get('/lab-member-list', async (req, res, next) => {
-  const page = req.query.page || 1;
-  const pageSize = req.query.pageSize || FETCH_DATA.PAGE_SIZE.LAB_MEMBER;
-  const limit = pageSize;
-  const offset = (page - 1) * limit;
-  const totalCount = await labService.count().catch(err => {
-    req.error = new LMSError(err.code, err.message);
-  });
-
-  if (isNumber(totalCount)) {
-    const totalPage = Math.ceil((totalCount * 1.0) / pageSize);
-
-    if (page > totalPage) {
-      return res
-        .status(200)
-        .json(new LMSResponse(null, { page, totalPage, labMembers: [] }));
-    }
-
-    labService.getLabMemberList({ limit, offset }).then(labMembers => {
-      res.status(200).json(new LMSResponse(null, { page, totalPage, labMembers }));
-    });
-  } else {
-    next();
+    labService
+      .getLabMemberList(req.lab.id, page, pageSize)
+      .then(data => res.status(200).json(new LMSResponse(null, data)))
+      .catch(err => {
+        console.log('get lab member list error: ', err);
+        req.error = new InternalError('Server error');
+        next();
+      });
   }
-});
+);
+
+export const labRouter = router;

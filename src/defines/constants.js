@@ -48,13 +48,14 @@ export const REQUIRE_USER_GET_PROFILE_FIELDS = [
   'job'
 ];
 export const REQUIRE_LAB_MEMBER_SIGN_UP_FIELDS = [
-  'labId',
-  'userId',
-  'position',
-  // 'confirmFile'
+  'username',
+  'password',
+  'fullname',
+  'email',
+  'IDCardNumber',
+  'gender',
+  'position'
 ];
-
-
 
 export const REQUIRE_USER_UPDATE_PROFILE_FIELDS = [
   ...REQUIRE_USER_GET_PROFILE_FIELDS,

@@ -19,7 +19,6 @@ export const useJwtStrategy = () => {
 
   passport.use(
     new JwtStrategy(opts, (jwtPayload, cb) => {
-      console.log('jwt payload: ', jwtPayload);
       if (!jwtPayload) {
         return cb(new UnauthorizatedRequest(), null);
       }
@@ -44,7 +43,6 @@ export const useLocalStrategy = () => {
           attributes: ['username', 'role', 'password', 'isAccepted']
         })
         .then(async user => {
-          console.log('uesr', user);
           if (user && (await comparePassword(password, user.password))) {
             return cb(null, omit(user, ['password']));
           }

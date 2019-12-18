@@ -181,4 +181,5 @@ router.post('/profile', withAuth, (req, res, next) => {
 router.post('/upload-avatar', withAuth, uploadImageFile, (req, res) => {
   uploadImage(req, res);
 });
+
 export const userRouter = router;

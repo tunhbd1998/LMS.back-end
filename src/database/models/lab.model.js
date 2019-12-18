@@ -52,6 +52,7 @@ LabModel.belongsToMany(UserModel, {
   through: LabMemberModel,
   foreignKey: 'labId',
   otherKey: 'userId',
+  primaryKey: true,
   // constraints: false,
   timestamps: false
 });
