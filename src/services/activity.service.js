@@ -1,33 +1,10 @@
-import { createConnection } from '../database';
-import { baseService } from './base.service';
-import { getActivityModel } from '../database/models/activity.model';
+import { ActivityModel } from '../database/models/activity.model';
+import { BaseService } from './base.service';
 
-class ActivityService {
-
-  getActivityById(activityId) {
-
-
-    return new Promise((resolve,reject) =>{
-      const conn = createConnection();
-      const activityModel = getActivityModel(conn);
-      baseService.findOne(activityModel,{
-        conditions: {id : activityId},
-        fields : [ 'id' , 'name' , 'address', 'image','imageId','startTime','endTime','detail' ],
-     
-      })
-      .then(activity => {
-        conn.close();
-        resolve(activity) 
-      })
-      .catch(err => {
-        conn.close();
-        reject(err)
-      });
-    });
+class ActivityService extends BaseService {
+  constructor() {
+    super(ActivityModel);
   }
-  
 }
-
-
 
 export const activityService = new ActivityService();
