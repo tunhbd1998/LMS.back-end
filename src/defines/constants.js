@@ -1,3 +1,9 @@
+export const GENDER = {
+  MALE: 1,
+  FEMALE: 0,
+  OTHER: -1
+};
+
 export const REQUIRE_ADMIN_LAB_SIGN_UP_FIELDS = [
   'fullname',
   'birthday',

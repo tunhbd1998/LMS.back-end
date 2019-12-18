@@ -1,2 +1,1 @@
-export { getUserModel } from './models/user.model';
-export { createConnection } from './connection';
+export { connection } from './connection';

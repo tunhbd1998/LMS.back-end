@@ -23,5 +23,13 @@ module.exports = {
   BCRYPT: {
     SALT_ROUNDS: 10
   },
-  USER_ROLES: ['MEMBER', 'LAB_ADMIN', 'LAB_MEMBER', 'ADMIN']
+  USER_ROLES: ['MEMBER', 'LAB_ADMIN', 'LAB_MEMBER', 'ADMIN'],
+  FETCH_DATA: {
+    PAGE_SIZE: {
+      RECRUITMENT: 10,
+      LAB: 10,
+      PROJECT: 10,
+      ACTIVITY: 10
+    }
+  }
 };

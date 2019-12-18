@@ -1,7 +1,7 @@
 import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-import { LMSError } from '../defines/errors';
+import { LMSError, InternalError, BadRequest } from '../defines/errors';
 import { LMSResponse } from '../defines/response';
 import {
   REQUIRE_MEMBER_SIGN_UP_FIELDS,
@@ -15,6 +15,7 @@ import { isEnoughFields } from '../utils/fields';
 import { withAuth } from '../middlewares/with-auth-middleware';
 import { uploadImageFile } from '../multer';
 import { uploadImage } from '../utils/uploadFile';
+import { labService } from '../services/lab.service';
 
 const router = express.Router();
 const { JWT } = PASSPORT;
@@ -26,7 +27,7 @@ router.get('/', (req, res, next) => {
 router.post('/sign-in', (req, res, next) => {
   passport.authenticate('local', { session: false }, (err, user, info) => {
     if (err) {
-      req.error = new LMSError(500, err);
+      req.error = new InternalError(err);
       return next();
     }
 
@@ -52,7 +53,7 @@ router.post('/sign-in', (req, res, next) => {
 
     req.logIn(user, { session: false }, err => {
       if (err) {
-        req.error = new LMSError(500, err);
+        req.error = new InternalError(err);
         return next();
       }
 
@@ -71,11 +72,11 @@ router.post('/sign-up-member', async (req, res, next) => {
   const data = req.body;
 
   if (!isEnoughFields(data, REQUIRE_MEMBER_SIGN_UP_FIELDS, true)) {
-    req.error = new LMSError(400, 'Bad request');
+    req.error = new BadRequest();
     return next();
   }
 
-  if (await userService.isExists(data.username)) {
+  if (await userService.isExists({ username: data.username })) {
     return res.status(200).json(
       new LMSResponse(null, {
         status: false,
@@ -85,16 +86,20 @@ router.post('/sign-up-member', async (req, res, next) => {
   }
 
   userService
-    .createOne(data)
+    .addUser(data)
     .then(user => {
       if (user) {
-        return res.status(200).json(new LMSResponse(null, { status: true }));
+        return res.status(200).json(
+          new LMSResponse(null, {
+            status: true
+          })
+        );
       }
 
       res.status(200).json(new LMSResponse(null, { status: false }));
     })
     .catch(err => {
-      req.error = new LMSError(500, err);
+      req.error = new InternalError(err);
       next();
     });
 });
@@ -108,11 +113,11 @@ router.post('/sign-up-lab', async (req, res, next) => {
       isEnoughFields(lab, REQUIRE_LAB_SIGN_UP_FIELDS, true)
     )
   ) {
-    req.error = new LMSError(400, 'Bad request');
+    req.error = new BadRequest();
     return next();
   }
 
-  if (await userService.isExists(user.username)) {
+  if (await userService.isExists({ username: user.username })) {
     return res.status(200).json(
       new LMSResponse(null, {
         status: false,
@@ -121,10 +126,11 @@ router.post('/sign-up-lab', async (req, res, next) => {
     );
   }
 
-  userService
-    .signUpLab(user, lab)
-    .then(({ user, lab }) => {
-      if (!user || !lab) {
+  labService
+    .signUpNewLab(user, lab)
+    .then(lab => {
+      console.log('new lab', lab);
+      if (!lab) {
         return res.status(200).json(new LMSResponse(null, { status: false }));
       }
 
@@ -137,18 +143,16 @@ router.post('/sign-up-lab', async (req, res, next) => {
 });
 
 router.post('/check-exists-username', async (req, res, next) => {
-  const flag = await userService.isExists(req.body.username);
+  const flag = await userService.isExists({ username: req.body.username });
 
   res.status(200).json(new LMSResponse(null, { exists: flag }));
 });
 
 router.get('/profile', withAuth, (req, res, next) => {
-  console.log('user', req.user);
   userService
     .getProfile(req.user.username)
     .then(profile => res.status(200).json(new LMSResponse(null, { profile })))
     .catch(err => {
-      console.log(err);
       req.error = new LMSError(500, 'Server error');
       next();
     });
@@ -159,15 +163,18 @@ router.post('/profile', withAuth, (req, res, next) => {
 
   if (isEnoughFields(data, REQUIRE_USER_UPDATE_PROFILE_FIELDS)) {
     userService
-      .updateOne(req.user.username, data)
+      .updateProfile(req.user.username, data)
       .then(user => {
         res.status(200).json(new LMSResponse(null, { profile: user }));
       })
       .catch(err => {
         console.log('err', err);
-        req.error = new LMSError(500, 'Server error');
+        req.error = new InternalError('error');
         next();
       });
+  } else {
+    req.error = new BadRequest();
+    next();
   }
 });
 

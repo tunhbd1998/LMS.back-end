@@ -11,7 +11,6 @@ export const withAuth = (req, res, next) => {
     }
 
     req.user = user;
-    console.log('userser', user);
     next();
   })(req, res, next);
 };

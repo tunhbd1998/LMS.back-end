@@ -22,6 +22,12 @@ module.exports = {
     SALT_ROUNDS: 10
   },
   USER_ROLES: ['MEMBER', 'LAB_ADMIN', 'LAB_MEMBER', 'ADMIN'],
+  USER_ROLE_ID: {
+    MEMBER: 0,
+    LAB_ADMIN: 1,
+    LAB_MEMBER: 2,
+    ADMIN: 3
+  },
   FETCH_DATA: {
     PAGE_SIZE: {
       RECRUITMENT: 10,

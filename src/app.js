@@ -12,7 +12,8 @@ import {
   userRouter,
   homeRouter,
   labRouter,
-  recruitmentRouter
+  recruitmentRouter,
+  activityRouter
 } from './routes';
 import { configPassport } from './passport';
 
@@ -40,6 +41,8 @@ configPassport(app);
 
 app.use('/', homeRouter);
 app.use('/users', userRouter);
+app.use('/activities', activityRouter);
+app.use('/labs', labRouter);
 app.use('/recruitments', recruitmentRouter);
 app.use('/labs', labRouter);
 app.use(handleNotFound);
