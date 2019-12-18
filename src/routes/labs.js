@@ -2,6 +2,7 @@ import express from 'express';
 import { isNumber, get } from 'lodash';
 import { FETCH_DATA } from '../config';
 import { LMSResponse } from '../defines/response';
+import { withAuth } from '../middlewares/with-auth-middleware';
 import { LMSError, InternalError } from '../defines/errors';
 import { convertToInt } from '../utils/lang';
 import { LabModel } from '../database/models/lab.model';
@@ -30,7 +31,7 @@ router.get('/filter/many', (req, res, next) => {
 router.get('/highlights', async (req, res, next) => {
   const page = convertToInt(req.query.page, 1);
   const pageSize = convertToInt(req.query.pageSize, FETCH_DATA.PAGE_SIZE.LAB);
-
+  
   labService
     .getHighlightLabs(page, pageSize)
     .then(({ page, totalPage, labs }) => {
@@ -41,7 +42,7 @@ router.get('/highlights', async (req, res, next) => {
       next();
     });
 });
-
+  
 router.get('/:id', (req, res, next) => {
   const labId = get(req, ['params', 'id']);
 
@@ -54,4 +55,3 @@ router.get('/:id', (req, res, next) => {
     });
 });
 
-export const labRouter = router;
