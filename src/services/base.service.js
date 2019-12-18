@@ -1,59 +1,116 @@
-import { isEmpty } from 'lodash';
+import { isEmpty, omit, keysIn, get } from 'lodash';
+import { Model } from 'sequelize';
 import { LMSError } from '../defines/errors';
 
-class BaseService {
-  formatQueryOptions({ conditions, fields, limit, offset, order }) {
+export class BaseService {
+  constructor(model) {
+    this.model = model;
+  }
+
+  formatWhere(where) {
+    if (isEmpty(where)) {
+      return {};
+    }
+
+    return omit(
+      where,
+      keysIn(where).filter(field => isEmpty(where[field]))
+    );
+  }
+
+  formatQueryOptions({
+    where,
+    attributes,
+    limit,
+    offset,
+    order,
+    include,
+    transaction,
+    ...otherOptions
+  }) {
     return {
-      where: conditions || {},
-      attributes: isEmpty(fields) === 0 ? undefined : fields,
+      where: this.formatWhere(where),
+      attributes: isEmpty(attributes) ? undefined : attributes,
       limit: limit || undefined,
       offset: offset || undefined,
-      order: order || undefined
+      order: order || undefined,
+      include: isEmpty(include)
+        ? undefined
+        : include.map(icl => ({
+            ...icl,
+            where: this.formatWhere(icl.where)
+          })),
+      transaction: transaction || undefined,
+      ...otherOptions
     };
   }
 
-  findOne(model, { conditions, fields }) {
-    return new Promise((resolve, reject) => {
-      if (!model) {
-        reject(new LMSError(500, `model is ${model}`));
-      }
-
-      model
-        .findOne(this.formatQueryOptions({ conditions, fields }))
-        .then(res => resolve(res ? res.dataValues : null))
-        .catch(err => reject(err));
-    });
+  formatCountQueryOptions({
+    where,
+    attributes,
+    col,
+    include,
+    transaction,
+    ...otherOptions
+  }) {
+    return {
+      where: this.formatWhere(where),
+      attributes: isEmpty(attributes) ? undefined : attributes,
+      col: col || undefined,
+      include: isEmpty(include)
+        ? undefined
+        : include.map(icl => ({
+            ...icl,
+            where: this.formatWhere(icl.where)
+          })),
+      transaction: transaction || undefined,
+      ...otherOptions
+    };
   }
 
-  findMany(model, { conditions, fields, limit, offset, order }) {
-    return new Promise((resolve, reject) => {
-      if (!model) {
-        reject(new LMSError(500, `model is ${model}`));
-      }
-
-      model
-        .findAll(
-          this.formatQueryOptions({ conditions, fields, limit, offset, order })
-        )
-        .then(resArr =>
-          resolve(!isEmpty(resArr) ? resArr.map(res => res.dataValues) : [])
-        )
-        .catch(err => reject(err));
+  async isExists(conditions, fieldToCheck) {
+    const ret = await this.model.findOne({
+      where: conditions,
+      attributes: [fieldToCheck]
     });
+
+    return ret ? true : false;
   }
 
-  count(model, conditions) {
-    return new Promise((resolve, reject) => {
-      if (!model) {
-        reject(new LMSError(500, `model is ${model}`));
-      }
+  async findOne(options) {
+    const ret = await this.model.findOne(this.formatQueryOptions(options));
 
-      model
-        .count(this.formatQueryOptions({ conditions }))
-        .then(res => resolve(res))
-        .catch(err => reject(err));
-    });
+    return get(ret, 'dataValues');
+  }
+
+  async findOneByPrimaryKey(primaryKey, primaryKeyValue, fields) {
+    return this.findOne(
+      this.formatQueryOptions({
+        where: { [primaryKey]: primaryKeyValue },
+        attributes: fields
+      })
+    );
+  }
+
+  async findMany(options) {
+    const rets = await this.model.findAll(this.formatQueryOptions(options));
+
+    return rets.map(ret => get(ret, 'dataValues'));
+  }
+
+  async count(options) {
+    return this.model.count(this.formatQueryOptions(options));
+  }
+
+  async createOne(values, options) {
+    const ret = await this.model.create(values, options);
+
+    return get(ret, 'dataValues');
+  }
+
+  async updateOne(values, options) {
+    const ret = await this.model.update(values, options);
+
+    return ret.length > 0;
   }
 }
-
-export const baseService = new BaseService();

@@ -1,48 +1,43 @@
 import Sequelize from 'sequelize';
-import { getUserModel } from './user.model';
+import { UserModel } from './user.model';
+import { connection } from '../connection';
 
-export const getSchedulerModel = conn => {
-  const SchedulerModel = conn.define(
-    'scheduler',
-    {
-      id: {
-        type: Sequelize.UUID,
-        primaryKey: true,
-      },
-      date: {
-        type: Sequelize.DATE,
-        defaultValue: null,
-      },
-      beginTime: {
-        type: Sequelize.DATE,
-        defaultValue: null,
-      },
-      endTime: {
-        type: Sequelize.DATE,
-        defaultValue: null,
-      },
-      work: {
-        type: Sequelize.TEXT,
-        defaultValue: null,
-      },
-      type: {
-        type: Sequelize.TINYINT,
-        defaultValue: 0,
-      },
-      // userId: {
-      //   type: Sequelize.STRING,
-      //   allowNull: false,
-      // },
+const SchedulerModel = connection.define(
+  'scheduler',
+  {
+    id: {
+      type: Sequelize.UUID,
+      primaryKey: true
     },
-    { tableName: 'scheduler', timestamps: false }
-  );
+    date: {
+      type: Sequelize.DATE,
+      defaultValue: null
+    },
+    beginTime: {
+      type: Sequelize.DATE,
+      defaultValue: null
+    },
+    endTime: {
+      type: Sequelize.DATE,
+      defaultValue: null
+    },
+    work: {
+      type: Sequelize.TEXT,
+      defaultValue: null
+    },
+    type: {
+      type: Sequelize.TINYINT,
+      defaultValue: 0
+    }
+  },
+  { tableName: 'scheduler', timestamps: false }
+);
 
-  const UserModel = getUserModel(conn);
-  SchedulerModel.belongsTo(UserModel, {
-    foreignKey: 'userId',
-    targetKey: 'username',
-    timestamps: false,
-  });
+SchedulerModel.belongsTo(UserModel, {
+  as: 'ofUser',
+  foreignKey: 'userId',
+  targetKey: 'username',
+  timestamps: false
+});
 
-  return SchedulerModel;
-};
+export { SchedulerModel };

@@ -11,6 +11,8 @@ export const createConnection = () => {
 
   return new Sequelize(dbName, dbUser, dbPass, {
     host: dbHost,
-    dialect: DATABASE.TYPE,
+    dialect: DATABASE.TYPE
   });
 };
+
+export const connection = createConnection();

@@ -6,9 +6,16 @@ import logger from 'morgan';
 import dotenv from 'dotenv';
 import debugModule from 'debug';
 import cors from 'cors';
-import { handleNotFound, handleError, userRouter, homeRouter ,activityRouter, labRouter } from './routes';
+import {
+  handleNotFound,
+  handleError,
+  userRouter,
+  homeRouter,
+  labRouter,
+  recruitmentRouter,
+  activityRouter
+} from './routes';
 import { configPassport } from './passport';
-import { recruitmentRouter } from './routes/recruitments';
 
 const log = debugModule('LMS:app');
 dotenv.config({ path: path.join(__dirname, '/.env') });
@@ -37,6 +44,7 @@ app.use('/users', userRouter);
 app.use('/activities', activityRouter);
 app.use('/labs', labRouter);
 app.use('/recruitments', recruitmentRouter);
+app.use('/labs', labRouter);
 app.use(handleNotFound);
 app.use(handleError);
 

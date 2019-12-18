@@ -5,3 +5,11 @@ export class QueryOptions {
     this.relations = relations;
   }
 }
+
+// export class CountQueryOptions {
+//   constructor(where, groupByAttributes, countOnColumn) {
+//     this.where = where;
+//     this.groupByAttributes = groupByAttributes;
+//     this.countOnColumn;
+//   }
+// }

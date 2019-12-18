@@ -1,32 +1,15 @@
 import Sequelize from 'sequelize';
-// import { getLabModel } from './lab.model';
-// import { getUserModel } from './user.model';
+import { connection } from '../connection';
 
-export const getLabMemberModel = conn => {
-  return conn.define(
-    'lab_member',
-    {
-      // labId: {
-      //   type: Sequelize.UUID,
-      //   primaryKey: true,
-      //   references: {
-      //     model: getLabModel(conn),
-      //     key: 'id',
-      //   },
-      // },
-      // userId: {
-      //   type: Sequelize.STRING,
-      //   primaryKey: true,
-      //   references: {
-      //     model: getUserModel(conn),
-      //     key: 'username',
-      //   },
-      // },
-      position: {
-        type: Sequelize.TEXT,
-        defaultValue: null,
-      },
-    },
-    { tableName: 'lab_member', timestamps: false }
-  );
-};
+const LabMemberModel = connection.define(
+  'lab_member',
+  {
+    position: {
+      type: Sequelize.TEXT,
+      defaultValue: null
+    }
+  },
+  { tableName: 'lab_member', timestamps: false }
+);
+
+export { LabMemberModel };

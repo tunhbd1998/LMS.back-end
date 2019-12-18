@@ -1,86 +1,65 @@
 import Sequelize, { SequelizeScopeError } from 'sequelize';
-import { getLabModel } from './lab.model';
-import { getUserModel } from './user.model';
-import { getSchedulerModel } from './scheduler.model';
-import { getProjectMemberModel } from './project-member.model';
-import { getProjectSchedulerModel } from './project-scheduler.model';
+import { UserModel } from './user.model';
+import { SchedulerModel } from './scheduler.model';
+import { ProjectSchedulerModel } from './project-scheduler.model';
+import { ProjectMemberModel } from './project-member.model';
+import { LabModel } from './lab.model';
+import { connection } from '../connection';
 
-export const getProjectModel = conn => {
-  const ProjectModel = conn.define(
-    'project',
-    {
-      id: {
-        type: Sequelize.UUID,
-        primaryKey: true
-      },
-      name: {
-        type: Sequelize.TEXT,
-        allowNull: false
-      },
-      description: {
-        type: Sequelize.TEXT,
-        defaultValue: null
-      },
-      status: {
-        type: Sequelize.TINYINT,
-        defaultValue: 0
-      },
-      image: {
-        type: Sequelize.STRING,
-        defaultValue: null
-      },
-      imageId: {
-        type: Sequelize.STRING,
-        defaultValue: null
-      }
-      // labId: {
-      //   type: Sequelize.UUID,
-      //   allowNull: false,
-      //   references: {
-      //     model: getLabModel(conn),
-      //     key: 'id',
-      //   },
-      // },
-      // projectAdmin: {
-      //   type: Sequelize.STRING,
-      //   defaultValue: null,
-      //   references: {
-      //     model: getUserModel(conn),
-      //     key: 'username',
-      //   },
-      // },
+const ProjectModel = connection.define(
+  'project',
+  {
+    id: {
+      type: Sequelize.UUID,
+      primaryKey: true
     },
-    { tableName: 'project', timestamps: false }
-  );
+    name: {
+      type: Sequelize.TEXT,
+      allowNull: false
+    },
+    description: {
+      type: Sequelize.TEXT,
+      defaultValue: null
+    },
+    status: {
+      type: Sequelize.TINYINT,
+      defaultValue: 0
+    },
+    image: {
+      type: Sequelize.STRING,
+      defaultValue: null
+    },
+    imageId: {
+      type: Sequelize.STRING,
+      defaultValue: null
+    }
+  },
+  { tableName: 'project', timestamps: false }
+);
 
-  const UserModel = getUserModel(conn);
-  const LabModel = getLabModel(conn);
-  const SchedulerModel = getSchedulerModel(conn);
-  const ProjectMemberModel = getProjectMemberModel(conn);
-  const ProjectSchedulerModel = getProjectSchedulerModel(conn);
+ProjectModel.belongsTo(UserModel, {
+  as: 'projectAdmin',
+  foreignKey: 'projectAdminId',
+  targetKey: 'username',
+  timestamps: false
+});
+ProjectModel.belongsTo(LabModel, {
+  as: 'lab',
+  foreignKey: 'labId',
+  targetKey: 'id',
+  timestamps: false
+});
+ProjectModel.belongsToMany(UserModel, {
+  through: ProjectMemberModel,
+  foreignKey: 'projectId',
+  otherKey: 'userId',
+  timestamps: false
+});
+ProjectModel.belongsToMany(SchedulerModel, {
+  through: ProjectSchedulerModel,
+  foreignKey: 'projectId',
+  otherKey: 'schedulerId',
+  timestamps: false
+});
 
-  ProjectModel.belongsTo(UserModel, {
-    foreignKey: 'projectAdmin',
-    targetKey: 'username',
-    timestamps: false
-  });
-  ProjectModel.belongsTo(LabModel, {
-    foreignKey: 'labId',
-    targetKey: 'id',
-    timestamps: false
-  });
-  ProjectModel.belongsToMany(UserModel, {
-    through: ProjectMemberModel,
-    foreignKey: 'projectId',
-    otherKey: 'userId',
-    timestamps: false
-  });
-  ProjectModel.belongsToMany(SchedulerModel, {
-    through: ProjectSchedulerModel,
-    foreignKey: 'projectId',
-    otherKey: 'schedulerId',
-    timestamps: false
-  });
-
-  return ProjectModel;
-};
+export { ProjectModel };

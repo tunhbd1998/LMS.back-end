@@ -23,8 +23,6 @@ var _cors = _interopRequireDefault(require("cors"));
 
 var _routes = require("./routes");
 
-var _services = require("./services");
-
 var _passport = require("./passport");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -56,28 +54,9 @@ app.set('view engine', 'ejs'); // config passport
 (0, _passport.configPassport)(app);
 app.use('/', _routes.homeRouter);
 app.use('/users', _routes.userRouter);
+app.use('/recruitments', _routes.recruitmentRouter);
 app.use('/labs', _routes.labRouter);
 app.use(_routes.handleNotFound);
-app.use(_routes.handleError); // userService
-//   .createOne({
-//     username: 'tunh',
-//     password: 'tunh',
-//     fullname: 'Nguyen huu tu',
-//     phone: '0909090909',
-//     email: 'tunhbd1998@gmail.com',
-//     IDCardNumber: '333333333',
-//     university: 'university of science'
-//   })
-//   .then(user => {
-//     log('created user', user);
-//   })
-//   .catch(err => {
-//     log('create error', err);
-//   });
-// userService
-//   .findOne({ username: 'tunh' })
-//   .then(user => log('user', user))
-//   .catch(err => log('error', err));
-
+app.use(_routes.handleError);
 var _default = app;
 exports.default = _default;

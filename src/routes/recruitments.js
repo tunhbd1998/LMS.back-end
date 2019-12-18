@@ -3,6 +3,7 @@ import { recruitmentService } from '../services';
 import { LMSResponse } from '../defines/response';
 import { LMSError } from '../defines/errors';
 import { FETCH_DATA } from '../config';
+import { RecruitmentModel } from '../database/models/recruitment.model';
 
 const router = Router();
 

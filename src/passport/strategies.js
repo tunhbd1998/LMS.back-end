@@ -1,11 +1,12 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import { omit } from 'lodash';
+import { omit, get } from 'lodash';
 import { PASSPORT } from '../config';
 import { userService } from '../services';
 import { comparePassword } from '../utils/password';
-import { LMSError } from '../defines/errors';
+import { LMSError, UnauthorizatedRequest } from '../defines/errors';
+import { UserModel } from '../database/models/user.model';
 
 const { JWT } = PASSPORT;
 
@@ -20,12 +21,12 @@ export const useJwtStrategy = () => {
     new JwtStrategy(opts, (jwtPayload, cb) => {
       console.log('jwt payload: ', jwtPayload);
       if (!jwtPayload) {
-        return cb(new LMSError(401, 'Unauthorization'), null);
+        return cb(new UnauthorizatedRequest(), null);
       }
       userService
         .findOne({
-          conditions: { username: jwtPayload.username },
-          fields: ['username', 'role']
+          where: { username: jwtPayload.username },
+          attributes: ['username', 'role']
         })
         .then(user => cb(null, user))
         .catch(err => cb(err, null));
@@ -39,10 +40,11 @@ export const useLocalStrategy = () => {
     new LocalStrategy(async (username, password, cb) => {
       userService
         .findOne({
-          conditions: { username },
-          fields: ['username', 'role', 'password', 'isAccepted']
+          where: { username },
+          attributes: ['username', 'role', 'password', 'isAccepted']
         })
         .then(async user => {
+          console.log('uesr', user);
           if (user && (await comparePassword(password, user.password))) {
             return cb(null, omit(user, ['password']));
           }
