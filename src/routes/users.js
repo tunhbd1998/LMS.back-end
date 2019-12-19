@@ -36,7 +36,7 @@ router.post('/sign-in', (req, res, next) => {
       return res.status(200).json(
         new LMSResponse(null, {
           token: null,
-          message: 'Your account is incorrect',
+          message: 'Tên đăng nhập hoặc mật khẩu không đúng',
           role: null
         })
       );
@@ -47,7 +47,7 @@ router.post('/sign-in', (req, res, next) => {
         new LMSResponse(null, {
           token: null,
           role: null,
-          message: 'Your account has not accepted by Admin'
+          message: 'Tài khoản của bạn chưa được duyệt bởi hệ thống.'
         })
       );
     }
@@ -62,7 +62,7 @@ router.post('/sign-in', (req, res, next) => {
         new LMSResponse(null, {
           token: jwt.sign(user, JWT.SECRET),
           role: USER_ROLES[user.role],
-          message: 'Sign in successfully'
+          message: 'Đăng nhập thành công'
         })
       );
     });
@@ -79,7 +79,7 @@ router.post(
       return res.status(200).json(
         new LMSResponse(null, {
           status: false,
-          message: 'username đã tồn tại. Hãy chọn username khác'
+          message: 'Tên đăng nhập đã tồn tại. Hãy chọn tên đăng nhập khác'
         })
       );
     }
@@ -121,7 +121,7 @@ router.post('/sign-up-lab', async (req, res, next) => {
     return res.status(200).json(
       new LMSResponse(null, {
         status: false,
-        message: 'username have exists'
+        message: 'Tên đăng nhập đã tồn tại. Hãy chọn tên đăng nhập khác'
       })
     );
   }
@@ -129,7 +129,6 @@ router.post('/sign-up-lab', async (req, res, next) => {
   labService
     .signUpNewLab(user, lab)
     .then(lab => {
-      console.log('new lab', lab);
       if (!lab) {
         return res.status(200).json(new LMSResponse(null, { status: false }));
       }
@@ -168,7 +167,6 @@ router.post('/profile', withAuth, (req, res, next) => {
         res.status(200).json(new LMSResponse(null, { profile: user }));
       })
       .catch(err => {
-        console.log('err', err);
         req.error = new InternalError('error');
         next();
       });

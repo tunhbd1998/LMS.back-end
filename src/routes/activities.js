@@ -2,11 +2,21 @@ import express from 'express';
 import { get } from 'lodash';
 import { activityService } from '../services/activity.service';
 import { LMSResponse } from '../defines/response';
-import { LMSError } from '../defines/errors';
-import { withAuth } from '../middlewares/with-auth-middleware';
+import { LMSError, InternalError } from '../defines/errors';
 import { LabModel } from '../database/models/lab.model';
 
 const router = express.Router();
+
+router.get('/active', (req, res, next) => {
+  activityService
+    .getActiveActivities()
+    .then(data => res.status(200).json(new LMSResponse(null, data)))
+    .catch(err => {
+      console.log('activitiesRoute:error ', err);
+      req.error = new InternalError('Lỗi');
+      next();
+    });
+});
 
 router.get('/:id', (req, res, next) => {
   const id = get(req, ['params', 'id'], null);

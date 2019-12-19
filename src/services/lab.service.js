@@ -10,6 +10,7 @@ import { LabAddressModel } from '../database/models/lab-address.model';
 import { LabModel } from '../database/models/lab.model';
 import { LabMemberModel } from '../database/models/lab-member.model';
 import { labMemberService } from './lab-member.service';
+import { hashPassword } from '../utils/password';
 
 class LabService extends BaseService {
   constructor() {
@@ -72,7 +73,7 @@ class LabService extends BaseService {
     return { page, totalPage, labs };
   }
 
-  async getHighlightLabs(page, pageSize) {
+  async getHighlightLabs(page = 1, pageSize = FETCH_DATA.PAGE_SIZE.LAB) {
     const limit = pageSize || FETCH_DATA.PAGE_SIZE.LAB;
     const offset = (page - 1) * limit;
     const totalCount = await this.count({
@@ -105,10 +106,15 @@ class LabService extends BaseService {
   }
 
   async signUpNewLab(adminData, labData) {
-    return connection.transaction(t =>
+    return connection.transaction(async t =>
       userService
         .createOne(
-          { ...adminData, role: USER_ROLE_ID.LAB_ADMIN },
+          {
+            ...adminData,
+            password: await hashPassword(adminData.password),
+            role: USER_ROLE_ID.LAB_ADMIN,
+            isAccepted: false
+          },
           { transaction: t }
         )
         .then(admin =>
