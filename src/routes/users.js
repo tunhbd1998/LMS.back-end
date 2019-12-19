@@ -16,6 +16,7 @@ import { withAuth } from '../middlewares/with-auth-middleware';
 import { uploadImageFile } from '../multer';
 import { uploadImage } from '../utils/uploadFile';
 import { labService } from '../services/lab.service';
+import { validateDTO } from '../middlewares/validate-dto.middleware';
 
 const router = express.Router();
 const { JWT } = PASSPORT;
@@ -68,41 +69,40 @@ router.post('/sign-in', (req, res, next) => {
   })(req, res, next);
 });
 
-router.post('/sign-up-member', async (req, res, next) => {
-  const data = req.body;
+router.post(
+  '/sign-up-member',
+  validateDTO(REQUIRE_MEMBER_SIGN_UP_FIELDS, true),
+  async (req, res, next) => {
+    const data = req.body;
 
-  if (!isEnoughFields(data, REQUIRE_MEMBER_SIGN_UP_FIELDS, true)) {
-    req.error = new BadRequest();
-    return next();
-  }
+    if (await userService.isExists({ username: data.username }, 'username')) {
+      return res.status(200).json(
+        new LMSResponse(null, {
+          status: false,
+          message: 'username đã tồn tại. Hãy chọn username khác'
+        })
+      );
+    }
 
-  if (await userService.isExists({ username: data.username })) {
-    return res.status(200).json(
-      new LMSResponse(null, {
-        status: false,
-        message: 'username have exists'
+    userService
+      .addUser(data)
+      .then(user => {
+        if (user) {
+          return res.status(200).json(
+            new LMSResponse(null, {
+              status: true
+            })
+          );
+        }
+
+        res.status(200).json(new LMSResponse(null, { status: false }));
       })
-    );
+      .catch(err => {
+        req.error = new InternalError(err);
+        next();
+      });
   }
-
-  userService
-    .addUser(data)
-    .then(user => {
-      if (user) {
-        return res.status(200).json(
-          new LMSResponse(null, {
-            status: true
-          })
-        );
-      }
-
-      res.status(200).json(new LMSResponse(null, { status: false }));
-    })
-    .catch(err => {
-      req.error = new InternalError(err);
-      next();
-    });
-});
+);
 
 router.post('/sign-up-lab', async (req, res, next) => {
   const { user, lab } = req.body;
@@ -117,7 +117,7 @@ router.post('/sign-up-lab', async (req, res, next) => {
     return next();
   }
 
-  if (await userService.isExists({ username: user.username })) {
+  if (await userService.isExists({ username: user.username }, 'username')) {
     return res.status(200).json(
       new LMSResponse(null, {
         status: false,
